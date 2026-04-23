@@ -1,0 +1,17 @@
+{
+  "name": "cats-ats",
+  "owner": {
+    "name": "BNENDS44",
+    "url": "https://github.com/BNENDS44"
+  },
+  "plugins": [
+    {
+      "name": "cats-ats",
+      "source": "./plugins/cats-ats",
+      "description": "CATS ATS for Claude Code — connects Claude to your CATS recruiting database via the cloud MCP server, with slash commands, a recruiter subagent, and a candidate-intake skill.",
+      "version": "0.1.0",
+      "category": "recruiting",
+      "tags": ["cats", "ats", "recruiting", "mcp"]
+    }
+  ]
+}

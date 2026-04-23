@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "cats-ats": {
+      "type": "http",
+      "url": "${CATS_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${CATS_BEARER_TOKEN}"
+      }
+    }
+  }
+}

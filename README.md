@@ -85,7 +85,28 @@ Each teammate adds the MCP to their Claude client. Pick the one they use.
 4. Authentication: **Bearer token** → paste the `SHARED_BEARER_TOKEN`.
 5. Save. Claude will list the connector's tools in the tool menu.
 
-### Claude Code (CLI)
+### Claude Code (CLI) — easiest: install the plugin
+
+This repo also ships a Claude Code **plugin** that bundles the MCP connection,
+slash commands (`/cats-find-candidate`, `/cats-pipeline`, `/cats-daily-summary`,
+`/cats-add-note`, `/cats-new-candidate`), a recruiter subagent, and a
+candidate-intake skill. Each teammate runs this once:
+
+```bash
+# 1. Tell Claude where your Worker lives and give it the shared token.
+#    Put these in your shell profile (~/.zshrc, ~/.bashrc) so they stick.
+export CATS_MCP_URL="https://cats-ats-mcp.yourname.workers.dev/mcp"
+export CATS_BEARER_TOKEN="the_shared_token_you_were_given"
+
+# 2. Add this repo as a plugin marketplace and install the plugin.
+claude
+> /plugin marketplace add BNENDS44/Claude_MCPs
+> /plugin install cats-ats@cats-ats
+```
+
+That's it — the MCP is wired up, and the slash commands show up when they type `/`.
+
+**Plain-manual alternative** (if the plugin flow doesn't work for someone):
 
 ```bash
 claude mcp add cats-ats \
