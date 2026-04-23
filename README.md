@@ -62,14 +62,23 @@ npm run deploy                                   # prints your MCP URL
 
 ## 2. Share with your team
 
-Your MCP endpoint is:
+Your MCP supports **two URL formats** depending on which Claude client the
+teammate uses:
+
+**For Claude Desktop and Claude.ai (web)** — the "Add custom connector" dialog
+only accepts a URL (no custom-header field), so the token goes in the URL:
+```
+https://cats-ats-mcp.<your-subdomain>.workers.dev/k/<SHARED_BEARER_TOKEN>/mcp
+```
+The whole URL is effectively a shared password — treat it like one.
+
+**For Claude Code (CLI)** — the CLI supports custom headers, so use the clean
+URL plus an `Authorization: Bearer` header (see section 3).
 ```
 https://cats-ats-mcp.<your-subdomain>.workers.dev/mcp
 ```
-(note the trailing `/mcp`). Send each teammate **two** things:
 
-- that URL
-- the `SHARED_BEARER_TOKEN` you set above
+Send each teammate the URL that matches their Claude client.
 
 ---
 
@@ -80,10 +89,16 @@ Each teammate adds the MCP to their Claude client. Pick the one they use.
 ### Claude Desktop (macOS / Windows)
 
 1. Open Claude Desktop → **Settings → Connectors → Add custom connector**.
-2. Name: `CATS ATS`
-3. URL: the `/mcp` URL you shared.
-4. Authentication: **Bearer token** → paste the `SHARED_BEARER_TOKEN`.
-5. Save. Claude will list the connector's tools in the tool menu.
+2. **Name:** `CATS ATS`
+3. **Remote MCP server URL:** paste the `/k/<TOKEN>/mcp` URL, e.g.
+   `https://cats-ats-mcp.yourname.workers.dev/k/YOUR_SHARED_BEARER_TOKEN/mcp`
+4. Leave the OAuth fields blank. Click **Add**.
+5. Claude will list the connector's tools in the tool menu.
+
+### Claude.ai (web)
+
+Go to **Settings → Connectors → Add custom connector** and enter the same
+`/k/<TOKEN>/mcp` URL as Desktop above. Leave OAuth fields blank.
 
 ### Claude Code (CLI) — easiest: install the plugin
 
@@ -108,17 +123,15 @@ That's it — the MCP is wired up, and the slash commands show up when they type
 
 **Plain-manual alternative** (if the plugin flow doesn't work for someone):
 
+The CLI supports custom headers, so the token goes in a header instead of
+the URL:
+
 ```bash
 claude mcp add cats-ats \
   --transport http \
   --url  https://cats-ats-mcp.yourname.workers.dev/mcp \
   --header "Authorization: Bearer YOUR_SHARED_BEARER_TOKEN"
 ```
-
-### Claude.ai (web)
-
-Go to **Settings → Connectors → Add custom connector** and fill in the same
-URL + bearer token as Desktop above.
 
 ---
 

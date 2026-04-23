@@ -759,8 +759,33 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    // Shared bearer gate (strongly recommended — otherwise anyone who discovers
-    // the Worker URL can hit your CATS account).
+    // URL-embedded token auth: /k/<TOKEN>/mcp
+    // Designed for the Claude.ai / Claude Desktop "Add custom connector" UI,
+    // which only accepts a URL (no custom header slot). The token is the
+    // SHARED_BEARER_TOKEN value; the whole URL functions as a shared secret.
+    // Example: https://worker.example/k/abc123/mcp
+    const urlTokenMatch = url.pathname.match(/^\/k\/([^/]+)(\/.*)?$/);
+    if (urlTokenMatch) {
+      const urlToken = urlTokenMatch[1];
+      const subPath = urlTokenMatch[2] ?? "/";
+      if (!env.SHARED_BEARER_TOKEN || urlToken !== env.SHARED_BEARER_TOKEN) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      if (subPath === "/mcp") {
+        const rewritten = new Request(
+          new URL("/mcp", url).toString(),
+          request,
+        );
+        return CatsMcp.serve("/mcp").fetch(rewritten, env, ctx);
+      }
+      return new Response(
+        "URL-embedded token auth only supports /mcp (Streamable HTTP).\n" +
+          "For SSE, use the /sse endpoint with Authorization: Bearer header.",
+        { status: 404 },
+      );
+    }
+
+    // Header-based auth for /mcp and /sse (for CLI clients that send headers).
     if (env.SHARED_BEARER_TOKEN) {
       if (url.pathname.startsWith("/mcp") || url.pathname.startsWith("/sse")) {
         const header = request.headers.get("Authorization") ?? "";
