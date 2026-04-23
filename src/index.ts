@@ -755,6 +755,58 @@ export class CatsMcp extends McpAgent<Env> {
   }
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function browserInfoPage(opts: {
+  title: string;
+  heading: string;
+  lead: string;
+  connectorUrl?: string;
+}): string {
+  const urlBlock = opts.connectorUrl
+    ? `<p><strong>Paste this URL into Claude:</strong></p>
+       <pre><code>${escapeHtml(opts.connectorUrl)}</code></pre>
+       <p class="muted">Treat this URL like a password — it contains your shared token.</p>`
+    : "";
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escapeHtml(opts.title)}</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #222; line-height: 1.5; }
+  h1 { color: #0b7f3f; }
+  pre { background: #f4f4f4; padding: 12px 16px; border-radius: 6px; overflow-x: auto; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; }
+  .muted { color: #666; font-size: 13px; }
+  ol li { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<h1>${escapeHtml(opts.heading)}</h1>
+<p>${escapeHtml(opts.lead)}</p>
+${urlBlock}
+<h2>Next step — add it to Claude</h2>
+<ol>
+  <li>Open <strong>Claude Desktop</strong> or <strong>Claude.ai</strong>.</li>
+  <li>Go to <strong>Settings → Connectors → Add custom connector</strong>.</li>
+  <li>Name it <code>CATS ATS</code>.</li>
+  <li>Paste the URL above as the <strong>Remote MCP server URL</strong>.</li>
+  <li>Leave every other field blank and click <strong>Add</strong>.</li>
+  <li>Start a new chat and ask: <em>"Using the CATS ATS connector, who am I?"</em></li>
+</ol>
+</body>
+</html>`;
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -772,11 +824,48 @@ export default {
         return new Response("Unauthorized", { status: 401 });
       }
       if (subPath === "/mcp") {
+        // Browsers can't speak MCP — MCP is JSON-RPC over POST. If a user
+        // hits this URL in a browser (GET) to "test" it, give a friendly
+        // explanation instead of the SDK's terse "Not found".
+        if (request.method === "GET") {
+          const connectorUrl = `${url.origin}/k/${urlToken}/mcp`;
+          return new Response(
+            browserInfoPage({
+              title: "CATS ATS — MCP endpoint (token verified)",
+              heading: "✓ Your token works — the server is reachable",
+              lead:
+                "You're looking at the MCP endpoint in a browser. Browsers can't " +
+                "actually talk MCP (the protocol needs POST with specific " +
+                "headers), so a browser will only ever see this page. The real " +
+                "test is adding it to Claude.",
+              connectorUrl,
+            }),
+            { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
+          );
+        }
         const rewritten = new Request(
           new URL("/mcp", url).toString(),
           request,
         );
         return CatsMcp.serve("/mcp").fetch(rewritten, env, ctx);
+      }
+      // /k/<TOKEN>/  (no /mcp suffix) — browser-friendly "token works" page so
+      // the recruiter can visually confirm the token is correct before pasting
+      // the full URL into Claude Desktop / Claude.ai.
+      if (subPath === "/" || subPath === "") {
+        const connectorUrl = `${url.origin}/k/${urlToken}/mcp`;
+        return new Response(
+          browserInfoPage({
+            title: "CATS ATS — token verified",
+            heading: "✓ Token is valid",
+            lead:
+              "Great — the server accepted your token. Copy the URL below and " +
+              "paste it into Claude Desktop or Claude.ai under " +
+              "Settings → Connectors → Add custom connector.",
+            connectorUrl,
+          }),
+          { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
+        );
       }
       return new Response(
         "URL-embedded token auth only supports /mcp (Streamable HTTP).\n" +
@@ -800,20 +889,53 @@ export default {
       return CatsMcp.serveSSE("/sse").fetch(request, env, ctx);
     }
     if (url.pathname === "/mcp") {
+      // Bare /mcp in a browser (GET) → friendly page instead of terse 404/405.
+      if (request.method === "GET") {
+        return new Response(
+          browserInfoPage({
+            title: "CATS ATS — MCP endpoint",
+            heading: "This is an MCP endpoint — not a web page",
+            lead:
+              "You reached the server, but /mcp expects MCP (JSON-RPC over POST). " +
+              "Browsers can't talk MCP, so you'll always see this page here. " +
+              "For Claude Desktop / Claude.ai, use the /k/<TOKEN>/mcp URL format " +
+              "so the token is embedded and no custom headers are needed.",
+          }),
+          { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
+        );
+      }
       return CatsMcp.serve("/mcp").fetch(request, env, ctx);
     }
 
-    if (url.pathname === "/" || url.pathname === "/health") {
+    if (url.pathname === "/health") {
       return new Response(
         JSON.stringify({
           ok: true,
           name: "cats-ats-mcp",
-          endpoints: { mcp: "/mcp", sse: "/sse" },
+          endpoints: { mcp: "/mcp", sse: "/sse", urlToken: "/k/<TOKEN>/mcp" },
         }),
         { headers: { "Content-Type": "application/json" } },
       );
     }
 
-    return new Response("Not found", { status: 404 });
+    if (url.pathname === "/") {
+      return new Response(
+        browserInfoPage({
+          title: "CATS ATS — MCP Server",
+          heading: "CATS ATS MCP server is running",
+          lead:
+            "This is the cloud MCP server for the CATS ATS. It's healthy. " +
+            "To connect a Claude client, use the /k/<YOUR_SHARED_BEARER_TOKEN>/mcp " +
+            "URL (for Claude Desktop / Claude.ai), or /mcp with an Authorization " +
+            "header (for Claude Code CLI).",
+        }),
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
+      );
+    }
+
+    return new Response(
+      "Not found. Valid paths: /, /health, /mcp, /sse, /k/<TOKEN>/mcp",
+      { status: 404 },
+    );
   },
 };
