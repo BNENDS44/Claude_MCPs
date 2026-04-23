@@ -15,81 +15,65 @@ that lets Claude (Desktop, Code, or the web app) drive your
 
 ---
 
-## 1. One-time setup (~10 minutes)
+## 1. Deploy (pick one path)
 
-You only do this once — your teammates don't need to repeat it.
+### Path A — One-click deploy (easiest, no coding)
 
-### Prereqs
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/BNENDS44/Claude_MCPs)
 
-1. A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free).
-2. A CATS ATS account with an **API key**. In CATS: *Settings → API → Generate
-   API Key*. Copy it; you'll paste it in step 5.
-3. [Node.js 20+](https://nodejs.org/) installed on your computer.
-4. This repository cloned locally:
-   ```bash
-   git clone https://github.com/bnends44/claude_mcps.git
-   cd claude_mcps
-   ```
+1. Click the button above. Sign in to Cloudflare if prompted (free account is fine).
+2. Cloudflare will fork this repo to your GitHub, create the Worker, and deploy.
+3. When it finishes, you'll see your Worker at
+   `https://cats-ats-mcp.<your-subdomain>.workers.dev` — copy that URL.
+4. Go to the [Cloudflare dashboard](https://dash.cloudflare.com/) →
+   **Workers & Pages → cats-ats-mcp → Settings → Variables and Secrets** and
+   add two **Secrets**:
+   - `CATS_API_KEY` — paste the API key from CATS (*Settings → API → Generate
+     API Key*)
+   - `SHARED_BEARER_TOKEN` — paste any long random string (see the generator
+     commands below). This is the password you'll share with teammates.
+5. Click **Deploy** on the dashboard to apply the secrets. Done.
 
-### Steps
-
-**2. Install dependencies**
+**Generate a random bearer token:**
 ```bash
-npm install
-```
-
-**3. Log in to Cloudflare**
-```bash
-npx wrangler login
-```
-This opens a browser window; click *Allow*.
-
-**4. Pick a unique name (optional)**
-Open `wrangler.jsonc` and change the `"name"` field if you want a custom
-subdomain. The default `cats-ats-mcp` will deploy to
-`https://cats-ats-mcp.<your-subdomain>.workers.dev`.
-
-**5. Upload your CATS API key as a secret**
-```bash
-npx wrangler secret put CATS_API_KEY
-```
-Paste the API key from CATS when prompted, then press Enter.
-
-**6. Create a shared bearer token (strongly recommended)**
-This is a password your team uses to talk to the MCP. Without it, anyone who
-discovers the URL can use your CATS account. Generate a random one:
-```bash
-# On macOS / Linux:
+# macOS / Linux / Git Bash on Windows:
 openssl rand -hex 32
 
-# On Windows PowerShell:
+# Windows PowerShell:
 -join ((48..57) + (97..122) | Get-Random -Count 64 | ForEach-Object { [char]$_ })
 ```
-Copy the output, then:
-```bash
-npx wrangler secret put SHARED_BEARER_TOKEN
-```
-Paste it in when prompted. **Save this token somewhere safe** — you'll share
-it with teammates in step 8.
+Or just use any password manager to generate a 64-char random string.
 
-**7. Deploy**
-```bash
-npm run deploy
-```
-Wrangler prints a URL like `https://cats-ats-mcp.yourname.workers.dev`. Copy
-that; it's your MCP endpoint. The MCP path is `/mcp`, so the full URL your
-team will use is:
-```
-https://cats-ats-mcp.yourname.workers.dev/mcp
-```
+### Path B — Deploy from your own machine (if you prefer the terminal)
 
-**8. Share with your team** — send them two things:
-- the URL above
-- the `SHARED_BEARER_TOKEN` value you generated in step 6
+**Prereqs:** Cloudflare account, CATS API key, [Node.js 20+](https://nodejs.org/).
+
+```bash
+git clone https://github.com/BNENDS44/Claude_MCPs.git
+cd Claude_MCPs
+npm install
+npx wrangler login                               # browser pops up → Allow
+npx wrangler secret put CATS_API_KEY             # paste your CATS API key
+npx wrangler secret put SHARED_BEARER_TOKEN      # paste random 64-char string
+npm run deploy                                   # prints your MCP URL
+```
 
 ---
 
-## 2. Team setup (per person)
+## 2. Share with your team
+
+Your MCP endpoint is:
+```
+https://cats-ats-mcp.<your-subdomain>.workers.dev/mcp
+```
+(note the trailing `/mcp`). Send each teammate **two** things:
+
+- that URL
+- the `SHARED_BEARER_TOKEN` you set above
+
+---
+
+## 3. Team setup (per person)
 
 Each teammate adds the MCP to their Claude client. Pick the one they use.
 
@@ -117,7 +101,7 @@ URL + bearer token as Desktop above.
 
 ---
 
-## 3. Local development
+## 4. Local development
 
 Want to try changes without deploying?
 
@@ -137,7 +121,7 @@ npm run tail
 
 ---
 
-## 4. What tools are exposed?
+## 5. What tools are exposed?
 
 Common recruiting flows are wrapped as first-class tools (Claude picks them
 automatically):
@@ -156,7 +140,7 @@ automatically):
 
 ---
 
-## 5. Security notes
+## 6. Security notes
 
 - **The `SHARED_BEARER_TOKEN` is the only thing standing between the public
   internet and your CATS account.** Treat it like a password. Rotate with
@@ -170,7 +154,7 @@ automatically):
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 **`Unauthorized` when teammates connect** — they're missing or mistyping the
 bearer token. Have them paste it again, exactly.
