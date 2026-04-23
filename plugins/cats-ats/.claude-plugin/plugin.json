@@ -1,0 +1,12 @@
+{
+  "name": "cats-ats",
+  "version": "0.1.0",
+  "description": "Drive your CATS ATS from Claude Code — search candidates, update jobs, add notes, and run daily recruiting workflows.",
+  "author": {
+    "name": "BNENDS44",
+    "url": "https://github.com/BNENDS44"
+  },
+  "homepage": "https://github.com/BNENDS44/Claude_MCPs",
+  "license": "MIT",
+  "keywords": ["cats", "ats", "recruiting", "mcp"]
+}
