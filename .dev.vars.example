@@ -1,0 +1,10 @@
+# Copy this file to `.dev.vars` for local development (`npm run dev`).
+# In production, set these with `npx wrangler secret put <NAME>` instead.
+
+# Your CATS ATS API key (shared by the whole team).
+CATS_API_KEY=
+
+# Optional: shared bearer token that clients must send in `Authorization: Bearer <token>`
+# to use the MCP. Highly recommended — otherwise anyone who discovers the URL
+# can call your CATS account.
+SHARED_BEARER_TOKEN=
