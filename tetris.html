@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hoops Tetris</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100%;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    background:
+      radial-gradient(ellipse at center, #1a1a1a 0%, #000 80%),
+      #000;
+    color: #fff;
+    overflow: hidden;
+    user-select: none;
+  }
+  body { display: flex; flex-direction: column; height: 100vh; }
+  #stage {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    gap: 24px;
+    padding: 20px;
+    position: relative;
+  }
+  #footer {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,1));
+    border-top: 2px solid #ff8c00;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #ccc;
+    box-shadow: 0 -4px 20px rgba(255,140,0,0.25);
+  }
+  #footer a {
+    text-decoration: none;
+    transition: filter 0.2s, text-shadow 0.2s;
+  }
+  #footer a:hover { filter: brightness(1.3); text-shadow: 0 0 8px rgba(255,140,0,0.6); }
+  #footer .brand {
+    background: linear-gradient(90deg, #ff8c00, #ffd700, #ff4500);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    letter-spacing: 3px;
+  }
+  #footer .name { color: #ffcc66; font-weight: bold; }
+  #footer .claude { color: #d97757; font-weight: bold; }
+  #footer .sep { color: #ff8c00; margin: 0 10px; }
+  .panel {
+    background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
+    border: 4px solid #2a1810;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(255,140,0,0.3), inset 0 0 20px rgba(0,0,0,0.4);
+    padding: 14px;
+    color: #fff;
+  }
+  .panel h2 {
+    font-size: 18px; letter-spacing: 2px;
+    color: #ffcc66; text-align: center; margin-bottom: 8px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  #left, #right { width: 200px; display: flex; flex-direction: column; gap: 14px; }
+  #boardWrap {
+    position: relative;
+    border: 6px solid #2a1810;
+    border-radius: 8px;
+    background: #000;
+    box-shadow:
+      0 0 50px rgba(255,140,0,0.4),
+      inset 0 0 30px rgba(0,0,0,0.8);
+  }
+  #board, #fx { display: block; }
+  #fx { position: absolute; left: 0; top: 0; pointer-events: none; }
+  #next { width: 160px; height: 120px; background: #000; border: 2px solid #2a1810; border-radius: 6px; margin: 0 auto; display:block; }
+  .stat { display:flex; justify-content:space-between; font-size:18px; padding: 4px 6px; background: rgba(0,0,0,0.4); border-radius: 4px; }
+  .stat span:first-child { color: #ffcc66; }
+  .stat span:last-child { color: #fff; font-weight: bold; }
+  .key { background:#222; border:1px solid #555; border-radius:4px; padding:2px 6px; font-family: monospace; font-size:12px; }
+  #help { font-size: 12px; line-height: 1.7; color: #eee; }
+  #help div { display:flex; justify-content:space-between; }
+  #title {
+    font-size: 36px; letter-spacing: 4px;
+    background: linear-gradient(180deg, #ff8c00 0%, #ff4500 50%, #8B0000 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+    margin-bottom: 6px;
+  }
+  #subtitle { text-align:center; font-size: 12px; color:#bbb; letter-spacing: 3px; margin-bottom: 4px; }
+  #overlay {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.75);
+    z-index: 10;
+    flex-direction: column; gap: 16px;
+  }
+  #overlay.show { display:flex; }
+  #overlay h1 {
+    font-size: 64px;
+    background: linear-gradient(180deg, #ff8c00, #ff4500);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 4px 4px 0 #000;
+    letter-spacing: 6px;
+  }
+  #overlay p { font-size: 18px; color:#ffcc66; }
+  #overlay button {
+    background: linear-gradient(180deg, #ff8c00, #c04000);
+    border: 3px solid #2a1810; color: #fff;
+    font-family: inherit; font-size: 22px; padding: 10px 28px;
+    border-radius: 8px; cursor: pointer; letter-spacing: 3px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  #overlay button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,140,0,0.5); }
+  #flash {
+    position: absolute; inset: 0; pointer-events: none;
+    z-index: 5; opacity: 0;
+    background: radial-gradient(circle, rgba(255,200,0,0.6), transparent 60%);
+    transition: opacity 0.2s;
+  }
+  #toast {
+    position: absolute; left: 50%; top: 30%;
+    transform: translate(-50%, 0) scale(0.5);
+    font-size: 56px; font-weight: 900;
+    background: linear-gradient(180deg, #ffd700, #ff4500);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 4px 4px 0 #000;
+    letter-spacing: 4px;
+    opacity: 0; pointer-events: none;
+    z-index: 8;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #toast.pop { opacity:1; transform: translate(-50%, -20px) scale(1); }
+
+  /* NBA Jam "ON FIRE" overlay */
+  #fireCanvas {
+    position: absolute; inset: 0; pointer-events: none;
+    z-index: 4;
+  }
+  #onFire {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 9;
+    pointer-events: none;
+    text-align: center;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #onFire.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #onFire .big {
+    font-size: 72px;
+    background: linear-gradient(180deg, #ffeb3b 0%, #ff9800 40%, #ff3d00 80%, #b71c1c 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+    text-shadow:
+      0 0 20px rgba(255,140,0,0.9),
+      0 0 40px rgba(255,69,0,0.7),
+      4px 4px 0 rgba(0,0,0,0.6);
+    animation: fireWobble 0.3s infinite alternate;
+  }
+  #onFire .sub {
+    font-size: 24px; letter-spacing: 8px; color: #ffeb3b;
+    text-shadow: 0 0 12px #ff4500, 2px 2px 0 #000;
+    margin-top: 4px;
+  }
+  @keyframes fireWobble {
+    from { transform: skewX(-3deg) scale(1); filter: brightness(1.1); }
+    to   { transform: skewX(3deg) scale(1.05); filter: brightness(1.4); }
+  }
+  #boardWrap.fire {
+    box-shadow:
+      0 0 80px rgba(255,69,0,0.9),
+      0 0 140px rgba(255,140,0,0.7),
+      inset 0 0 30px rgba(255,69,0,0.3);
+    border-color: #ff4500;
+    animation: firePulse 0.4s infinite alternate;
+  }
+  @keyframes firePulse {
+    from { box-shadow: 0 0 60px rgba(255,69,0,0.7), 0 0 120px rgba(255,140,0,0.5); }
+    to   { box-shadow: 0 0 100px rgba(255,200,0,1),  0 0 180px rgba(255,69,0,0.9); }
+  }
+  #fireBadge {
+    display: none;
+    background: linear-gradient(90deg, #ff4500, #ffd700, #ff4500);
+    background-size: 200% 100%;
+    animation: fireShine 1s linear infinite;
+    color: #000; font-weight: 900;
+    padding: 4px 10px; border-radius: 4px;
+    letter-spacing: 2px; font-size: 14px;
+    text-align: center; margin-top: 6px;
+    text-shadow: 0 0 4px rgba(255,255,255,0.5);
+    border: 2px solid #b71c1c;
+  }
+  @keyframes fireShine {
+    from { background-position: 200% 0; }
+    to   { background-position: 0 0; }
+  }
+  #fireBadge.show { display: block; }
+  .scoreboard {
+    background: #000; border: 3px solid #ff8c00;
+    border-radius: 6px; padding: 8px;
+    font-family: 'Courier New', monospace;
+    box-shadow: inset 0 0 12px rgba(255,140,0,0.4);
+  }
+  .led { color: #ff4500; text-shadow: 0 0 8px #ff4500; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="left">
+    <div class="panel">
+      <div id="title">HOOPS</div>
+      <div id="subtitle">★ TETRIS ★</div>
+    </div>
+    <div class="panel scoreboard">
+      <h2>SCOREBOARD</h2>
+      <div class="stat"><span>SCORE</span><span class="led" id="score">0</span></div>
+      <div class="stat"><span>LINES</span><span class="led" id="lines">0</span></div>
+      <div class="stat"><span>LEVEL</span><span class="led" id="level">1</span></div>
+      <div class="stat"><span>HIGH</span><span class="led" id="high">0</span></div>
+      <div id="fireBadge">🔥 ON FIRE 🔥</div>
+    </div>
+    <div class="panel scoreboard">
+      <h2>ALL-TIME</h2>
+      <div class="stat"><span>TOTAL LINES</span><span class="led" id="totalLines">0</span></div>
+      <div class="stat"><span>TOTAL DUNKS</span><span class="led" id="totalTetrises">0</span></div>
+      <div class="stat"><span>GAMES</span><span class="led" id="totalGames">0</span></div>
+    </div>
+    <div class="panel">
+      <h2>NEXT BALL</h2>
+      <canvas id="next" width="160" height="120"></canvas>
+    </div>
+  </div>
+
+  <div id="boardWrap">
+    <canvas id="board" width="300" height="600"></canvas>
+    <canvas id="fx" width="300" height="600"></canvas>
+    <canvas id="fireCanvas" width="300" height="600"></canvas>
+    <div id="flash"></div>
+    <div id="toast"></div>
+    <div id="onFire"><div class="big" id="fireBig">HE'S ON FIRE!</div><div class="sub" id="fireSub">★ BOOMSHAKALAKA ★</div></div>
+    <div id="overlay">
+      <h1 id="overlayTitle">TIP OFF!</h1>
+      <p id="overlaySub">Press SPACE or click START</p>
+      <button id="startBtn">START GAME</button>
+    </div>
+  </div>
+
+  <div id="right">
+    <div class="panel">
+      <h2>CONTROLS</h2>
+      <div id="help">
+        <div><span>Move</span><span class="key">← →</span></div>
+        <div><span>Soft Drop</span><span class="key">↓</span></div>
+        <div><span>Rotate</span><span class="key">↑ / X</span></div>
+        <div><span>Rotate L</span><span class="key">Z</span></div>
+        <div><span>Hard Drop</span><span class="key">SPACE</span></div>
+        <div><span>Hold</span><span class="key">C</span></div>
+        <div><span>Pause</span><span class="key">P</span></div>
+        <div><span>Restart</span><span class="key">R</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>HOLD</h2>
+      <canvas id="hold" width="160" height="120"></canvas>
+    </div>
+    <div class="panel">
+      <h2>COMBO</h2>
+      <div class="stat"><span>STREAK</span><span class="led" id="combo">0</span></div>
+      <div class="stat"><span>TETRIS</span><span class="led" id="tetrisCt">0</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  Powered by <a class="brand" href="https://human-co-pilot.com" target="_blank" rel="noopener">Human Co-Pilot</a>
+  <span class="sep">·</span>
+  Created by <a class="claude" href="https://claude.ai" target="_blank" rel="noopener">Claude</a>
+  <span class="sep">·</span>
+  Prompted by <a class="name" href="https://bryantoberg.com" target="_blank" rel="noopener">Bryant Oberg</a>
+</div>
+
+<script>
+(() => {
+  const COLS = 10, ROWS = 20, SIZE = 30;
+  const board = document.getElementById('board');
+  const ctx = board.getContext('2d');
+  const fx = document.getElementById('fx');
+  const fxCtx = fx.getContext('2d');
+  const fire = document.getElementById('fireCanvas');
+  const fireCtx = fire.getContext('2d');
+  const nextCv = document.getElementById('next');
+  const nextCtx = nextCv.getContext('2d');
+  const holdCv = document.getElementById('hold');
+  const holdCtx = holdCv.getContext('2d');
+
+  const scoreEl = document.getElementById('score');
+  const linesEl = document.getElementById('lines');
+  const levelEl = document.getElementById('level');
+  const highEl  = document.getElementById('high');
+  const comboEl = document.getElementById('combo');
+  const tetrisEl= document.getElementById('tetrisCt');
+  const totalLinesEl = document.getElementById('totalLines');
+  const totalTetrisesEl = document.getElementById('totalTetrises');
+  const totalGamesEl = document.getElementById('totalGames');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlaySub = document.getElementById('overlaySub');
+  const startBtn = document.getElementById('startBtn');
+  const flash = document.getElementById('flash');
+  const toast = document.getElementById('toast');
+  const onFireEl = document.getElementById('onFire');
+  const fireBig = document.getElementById('fireBig');
+  const fireSub = document.getElementById('fireSub');
+  const fireBadge = document.getElementById('fireBadge');
+  const boardWrap = document.getElementById('boardWrap');
+
+  // Classic NBA Jam announcer calls (Tim Kitzrow)
+  const JAM_CALLS = [
+    { big: "HE'S ON FIRE!",         sub: "★ BOOMSHAKALAKA ★" },
+    { big: "BOOMSHAKALAKA!",        sub: "★ FROM DOWNTOWN ★" },
+    { big: "IS IT THE SHOES?!",     sub: "★ RAZZLE DAZZLE ★" },
+    { big: "RAZZLE DAZZLE!",        sub: "★ KABOOM ★" },
+    { big: "FROM DOWNTOWN!",        sub: "★ MONSTER JAM ★" },
+    { big: "KABOOM!",               sub: "★ HE'S HEATING UP ★" },
+    { big: "MONSTER JAM!",          sub: "★ JAMS IT IN ★" },
+    { big: "JAMS IT IN!",           sub: "★ WITH AUTHORITY ★" },
+    { big: "WITH AUTHORITY!",       sub: "★ HE'S ON FIRE ★" },
+    { big: "WITH NO REGARD FOR HUMAN LIFE!", sub: "★ BOOMSHAKALAKA ★" },
+    { big: "HE'S HEATING UP!",      sub: "★ IS IT THE SHOES ★" },
+    { big: "THE NAIL IN THE COFFIN!", sub: "★ GAME OVER FOR THEM ★" },
+    { big: "WHIRLWIND!",            sub: "★ RAZZLE DAZZLE ★" },
+  ];
+  let lastJamIdx = -1;
+  function pickJamCall() {
+    let i;
+    do { i = Math.floor(Math.random() * JAM_CALLS.length); }
+    while (i === lastJamIdx && JAM_CALLS.length > 1);
+    lastJamIdx = i;
+    return JAM_CALLS[i];
+  }
+
+  // 7 tetrominoes, each shaded as a basketball
+  const PIECES = {
+    I: { color: '#ff8c00', shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]] },
+    O: { color: '#ffd700', shape: [[1,1],[1,1]] },
+    T: { color: '#9b30ff', shape: [[0,1,0],[1,1,1],[0,0,0]] },
+    S: { color: '#32cd32', shape: [[0,1,1],[1,1,0],[0,0,0]] },
+    Z: { color: '#ff3030', shape: [[1,1,0],[0,1,1],[0,0,0]] },
+    L: { color: '#1e90ff', shape: [[0,0,1],[1,1,1],[0,0,0]] },
+    J: { color: '#ff69b4', shape: [[1,0,0],[1,1,1],[0,0,0]] },
+  };
+  const KEYS = Object.keys(PIECES);
+
+  let grid, current, nextPiece, holdPiece, canHold;
+  let score, lines, level, combo, tetrisCount;
+  let dropInterval, dropCounter, lastTime;
+  let running, paused, gameOver;
+  let particles = [];
+  let flames = [];
+  let shake = 0;
+  let onFire = false;
+  let onFireRemaining = 0; // # of subsequent line clears that keep fire alive
+
+  // Persistent stats across sessions
+  const STORE_KEY = 'hoopsTetrisStats_v2';
+  const stats = loadStats();
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) return Object.assign({ high:0, totalLines:0, totalTetrises:0, games:0 }, JSON.parse(raw));
+    } catch (e) {}
+    // Migrate from old key if present
+    const oldHigh = parseInt(localStorage.getItem('hoopsTetrisHigh') || '0', 10);
+    return { high: oldHigh, totalLines: 0, totalTetrises: 0, games: 0 };
+  }
+  function saveStats() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(stats)); } catch (e) {}
+  }
+
+  highEl.textContent = stats.high;
+  totalLinesEl.textContent = stats.totalLines;
+  totalTetrisesEl.textContent = stats.totalTetrises;
+  totalGamesEl.textContent = stats.games;
+
+  function newGrid() {
+    return Array.from({length: ROWS}, () => Array(COLS).fill(0));
+  }
+
+  function randPiece() {
+    const k = KEYS[Math.floor(Math.random() * KEYS.length)];
+    const p = PIECES[k];
+    return {
+      type: k,
+      color: p.color,
+      shape: p.shape.map(r => r.slice()),
+      x: Math.floor((COLS - p.shape[0].length) / 2),
+      y: 0,
+    };
+  }
+
+  function rotate(matrix, dir) {
+    const N = matrix.length;
+    const res = Array.from({length: N}, () => Array(N).fill(0));
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      if (dir > 0) res[x][N - 1 - y] = matrix[y][x];
+      else res[N - 1 - x][y] = matrix[y][x];
+    }
+    return res;
+  }
+
+  function collide(g, p) {
+    for (let y = 0; y < p.shape.length; y++) {
+      for (let x = 0; x < p.shape[y].length; x++) {
+        if (!p.shape[y][x]) continue;
+        const gx = p.x + x, gy = p.y + y;
+        if (gx < 0 || gx >= COLS || gy >= ROWS) return true;
+        if (gy >= 0 && g[gy][gx]) return true;
+      }
+    }
+    return false;
+  }
+
+  function merge(g, p) {
+    p.shape.forEach((row, y) => row.forEach((v, x) => {
+      if (v) g[p.y + y][p.x + x] = p.color;
+    }));
+  }
+
+  // Draw a basketball-styled cell at (px, py) of size s
+  function drawBall(c, px, py, s, color) {
+    const r = s / 2;
+    const cx = px + r, cy = py + r;
+    // Outer shadow ring (court line)
+    c.fillStyle = '#1a0a00';
+    c.fillRect(px, py, s, s);
+    // Basketball gradient
+    const g = c.createRadialGradient(cx - r * 0.4, cy - r * 0.4, r * 0.1, cx, cy, r);
+    g.addColorStop(0, lighten(color, 0.5));
+    g.addColorStop(0.6, color);
+    g.addColorStop(1, darken(color, 0.5));
+    c.beginPath();
+    c.arc(cx, cy, r - 1.5, 0, Math.PI * 2);
+    c.fillStyle = g;
+    c.fill();
+    // Basketball seams
+    c.strokeStyle = 'rgba(0,0,0,0.55)';
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.moveTo(px + 2, cy); c.lineTo(px + s - 2, cy);
+    c.moveTo(cx, py + 2); c.lineTo(cx, py + s - 2);
+    c.stroke();
+    c.beginPath();
+    c.arc(cx, cy, r - 1.5, Math.PI * 0.2, Math.PI * 0.8);
+    c.stroke();
+    c.beginPath();
+    c.arc(cx, cy, r - 1.5, Math.PI * 1.2, Math.PI * 1.8);
+    c.stroke();
+    // Highlight
+    c.beginPath();
+    c.arc(cx - r * 0.35, cy - r * 0.35, r * 0.25, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(255,255,255,0.35)';
+    c.fill();
+  }
+
+  function lighten(hex, amt) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgb(${Math.min(255, r + 255*amt)|0}, ${Math.min(255, g + 255*amt)|0}, ${Math.min(255, b + 255*amt)|0})`;
+  }
+  function darken(hex, amt) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgb(${Math.max(0, r*(1-amt))|0}, ${Math.max(0, g*(1-amt))|0}, ${Math.max(0, b*(1-amt))|0})`;
+  }
+  function hexToRgb(hex) {
+    const m = hex.replace('#','');
+    return [parseInt(m.slice(0,2),16), parseInt(m.slice(2,4),16), parseInt(m.slice(4,6),16)];
+  }
+
+  function drawCourt() {
+    // Hardwood floor pattern
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const shade = (x + y) % 2 === 0 ? '#3a1f0a' : '#2a1505';
+        ctx.fillStyle = shade;
+        ctx.fillRect(x * SIZE, y * SIZE, SIZE, SIZE);
+        // wood grain streaks
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(x * SIZE, y * SIZE + SIZE * 0.3);
+        ctx.lineTo(x * SIZE + SIZE, y * SIZE + SIZE * 0.3);
+        ctx.stroke();
+      }
+    }
+    // Court lines: center stripe + key area
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, ROWS * SIZE / 2);
+    ctx.lineTo(COLS * SIZE, ROWS * SIZE / 2);
+    ctx.stroke();
+    // 3-point arc at bottom (the "hoop" side)
+    ctx.beginPath();
+    ctx.arc(COLS * SIZE / 2, ROWS * SIZE, COLS * SIZE * 0.45, Math.PI, 0, false);
+    ctx.stroke();
+  }
+
+  function drawGhost(p) {
+    const g = { ...p, shape: p.shape.map(r => r.slice()), x: p.x, y: p.y };
+    while (!collide(grid, g)) g.y++;
+    g.y--;
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    g.shape.forEach((row, y) => row.forEach((v, x) => {
+      if (v) {
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect((g.x + x) * SIZE + 2, (g.y + y) * SIZE + 2, SIZE - 4, SIZE - 4);
+      }
+    }));
+    ctx.restore();
+  }
+
+  function drawPiece(p, c = ctx, ox = 0, oy = 0, scale = SIZE) {
+    p.shape.forEach((row, y) => row.forEach((v, x) => {
+      if (v) drawBall(c, ox + (p.x + x) * scale, oy + (p.y + y) * scale, scale, p.color);
+    }));
+  }
+
+  function drawPreview(piece, c, w, h) {
+    c.clearRect(0, 0, w, h);
+    c.fillStyle = '#000';
+    c.fillRect(0, 0, w, h);
+    if (!piece) return;
+    const s = 22;
+    const sw = piece.shape[0].length * s;
+    const sh = piece.shape.length * s;
+    const ox = (w - sw) / 2;
+    const oy = (h - sh) / 2;
+    piece.shape.forEach((row, y) => row.forEach((v, x) => {
+      if (v) drawBall(c, ox + x * s, oy + y * s, s, piece.color);
+    }));
+  }
+
+  function render() {
+    const sx = shake ? (Math.random() - 0.5) * shake : 0;
+    const sy = shake ? (Math.random() - 0.5) * shake : 0;
+    if (shake > 0) shake *= 0.85;
+    if (shake < 0.1) shake = 0;
+
+    ctx.save();
+    ctx.translate(sx, sy);
+    drawCourt();
+    // Settled blocks
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (grid[y][x]) drawBall(ctx, x * SIZE, y * SIZE, SIZE, grid[y][x]);
+      }
+    }
+    if (current) {
+      drawGhost(current);
+      drawPiece(current);
+    }
+    ctx.restore();
+
+    // Particles on fx layer
+    fxCtx.clearRect(0, 0, fx.width, fx.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      fxCtx.fillStyle = p.color;
+      fxCtx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      fxCtx.beginPath();
+      fxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      fxCtx.fill();
+    }
+    fxCtx.globalAlpha = 1;
+
+    // Flame layer (NBA Jam ON FIRE)
+    fireCtx.clearRect(0, 0, fire.width, fire.height);
+    if (onFire) {
+      spawnFlames();
+      fireCtx.globalCompositeOperation = 'lighter';
+      for (let i = flames.length - 1; i >= 0; i--) {
+        const f = flames[i];
+        f.x += f.vx; f.y += f.vy; f.vy *= 0.97; f.life--;
+        f.size *= 0.98;
+        if (f.life <= 0 || f.size < 1) { flames.splice(i, 1); continue; }
+        const a = Math.max(0, f.life / f.maxLife);
+        const grad = fireCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size);
+        grad.addColorStop(0, `hsla(${f.hue}, 100%, 70%, ${a})`);
+        grad.addColorStop(0.5, `hsla(${f.hue}, 100%, 50%, ${a * 0.6})`);
+        grad.addColorStop(1, `hsla(${f.hue}, 100%, 30%, 0)`);
+        fireCtx.fillStyle = grad;
+        fireCtx.beginPath();
+        fireCtx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+        fireCtx.fill();
+      }
+      fireCtx.globalCompositeOperation = 'source-over';
+    }
+  }
+
+  function spawnParticles(rowIndex, color) {
+    for (let x = 0; x < COLS; x++) {
+      for (let i = 0; i < 4; i++) {
+        particles.push({
+          x: x * SIZE + SIZE / 2,
+          y: rowIndex * SIZE + SIZE / 2,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 1) * 6,
+          size: 2 + Math.random() * 3,
+          color: i % 2 === 0 ? '#ff8c00' : '#ffd700',
+          life: 30 + Math.random() * 20,
+          maxLife: 50,
+        });
+      }
+    }
+  }
+
+  function clearLines() {
+    let cleared = 0;
+    const clearedRows = [];
+    for (let y = ROWS - 1; y >= 0; y--) {
+      if (grid[y].every(v => v)) {
+        clearedRows.push(y);
+        spawnParticles(y, grid[y][0]);
+        grid.splice(y, 1);
+        grid.unshift(Array(COLS).fill(0));
+        cleared++;
+        y++;
+      }
+    }
+    if (cleared) {
+      let base = [0, 100, 300, 500, 800][cleared] * level;
+      if (onFire) base *= 2; // double points while on fire
+      score += base;
+      lines += cleared;
+      stats.totalLines += cleared;
+      const newLevel = Math.floor(lines / 10) + 1;
+      if (newLevel > level) {
+        level = newLevel;
+        dropInterval = Math.max(80, 800 - (level - 1) * 70);
+      }
+      combo++;
+      if (cleared === 4) {
+        tetrisCount++;
+        stats.totalTetrises++;
+        shake = 14;
+        flashScreen();
+        igniteFire();        // NBA Jam "ON FIRE!" mode (rotates phrases)
+        showToast('SLAM DUNK!');
+      } else if (cleared === 3) {
+        showToast('TRIPLE!');
+        shake = 8;
+      } else if (cleared === 2) {
+        showToast('DOUBLE!');
+        shake = 5;
+      } else {
+        showToast('SWISH!');
+        shake = 3;
+      }
+      if (combo >= 3) showToast(`COMBO x${combo}!`);
+      // While on fire, every clear extends the fire a bit
+      if (onFire) {
+        onFireRemaining = Math.max(onFireRemaining, 3);
+      }
+    } else {
+      combo = 0;
+      // If they go cold (a lock with no clears), tick fire down
+      if (onFire) {
+        onFireRemaining--;
+        if (onFireRemaining <= 0) extinguishFire();
+      }
+    }
+    saveStats();
+    updateHUD();
+  }
+
+  function igniteFire() {
+    onFire = true;
+    onFireRemaining = 4;
+    boardWrap.classList.add('fire');
+    fireBadge.classList.add('show');
+    const call = pickJamCall();
+    fireBig.textContent = call.big;
+    fireSub.textContent = call.sub;
+    onFireEl.classList.remove('show');
+    void onFireEl.offsetWidth; // restart CSS transition
+    onFireEl.classList.add('show');
+    setTimeout(() => onFireEl.classList.remove('show'), 1500);
+  }
+
+  function extinguishFire() {
+    onFire = false;
+    onFireRemaining = 0;
+    boardWrap.classList.remove('fire');
+    fireBadge.classList.remove('show');
+    flames = [];
+    fireCtx.clearRect(0, 0, fire.width, fire.height);
+  }
+
+  function spawnFlames() {
+    if (!onFire) return;
+    // Emit flame particles from the bottom of the board
+    for (let i = 0; i < 6; i++) {
+      flames.push({
+        x: Math.random() * fire.width,
+        y: fire.height + Math.random() * 10,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: -1.5 - Math.random() * 2.5,
+        size: 6 + Math.random() * 10,
+        life: 50 + Math.random() * 30,
+        maxLife: 80,
+        hue: 10 + Math.random() * 40, // red-orange-yellow
+      });
+    }
+  }
+
+  function flashScreen() {
+    flash.style.opacity = '1';
+    setTimeout(() => flash.style.opacity = '0', 200);
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.remove('pop');
+    void toast.offsetWidth;
+    toast.classList.add('pop');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('pop'), 900);
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = score;
+    linesEl.textContent = lines;
+    levelEl.textContent = level;
+    comboEl.textContent = combo;
+    tetrisEl.textContent = tetrisCount;
+    if (score > stats.high) {
+      stats.high = score;
+      saveStats();
+    }
+    highEl.textContent = stats.high;
+    totalLinesEl.textContent = stats.totalLines;
+    totalTetrisesEl.textContent = stats.totalTetrises;
+    totalGamesEl.textContent = stats.games;
+  }
+
+  function lock() {
+    merge(grid, current);
+    clearLines();
+    current = nextPiece;
+    nextPiece = randPiece();
+    canHold = true;
+    drawPreview(nextPiece, nextCtx, nextCv.width, nextCv.height);
+    if (collide(grid, current)) endGame();
+  }
+
+  function move(dx) {
+    current.x += dx;
+    if (collide(grid, current)) current.x -= dx;
+  }
+
+  function softDrop() {
+    current.y++;
+    if (collide(grid, current)) {
+      current.y--;
+      lock();
+      dropCounter = 0;
+    } else {
+      score += 1;
+      updateHUD();
+    }
+  }
+
+  function hardDrop() {
+    let dist = 0;
+    while (!collide(grid, current)) { current.y++; dist++; }
+    current.y--;
+    score += Math.max(0, (dist - 1) * 2);
+    lock();
+    shake = Math.max(shake, 4);
+    dropCounter = 0;
+  }
+
+  function tryRotate(dir) {
+    const old = current.shape;
+    current.shape = rotate(current.shape, dir);
+    // Basic wall kicks
+    const kicks = [0, -1, 1, -2, 2];
+    for (const k of kicks) {
+      current.x += k;
+      if (!collide(grid, current)) return;
+      current.x -= k;
+    }
+    current.shape = old;
+  }
+
+  function hold() {
+    if (!canHold) return;
+    if (holdPiece) {
+      const tmp = holdPiece;
+      holdPiece = { type: current.type, color: current.color, shape: PIECES[current.type].shape.map(r=>r.slice()) };
+      current = { ...tmp, shape: PIECES[tmp.type].shape.map(r=>r.slice()), x: Math.floor((COLS - PIECES[tmp.type].shape[0].length)/2), y: 0 };
+    } else {
+      holdPiece = { type: current.type, color: current.color, shape: PIECES[current.type].shape.map(r=>r.slice()) };
+      current = nextPiece;
+      nextPiece = randPiece();
+      drawPreview(nextPiece, nextCtx, nextCv.width, nextCv.height);
+    }
+    drawPreview(holdPiece, holdCtx, holdCv.width, holdCv.height);
+    canHold = false;
+  }
+
+  function update(time = 0) {
+    if (!running) return;
+    const dt = time - lastTime;
+    lastTime = time;
+    if (!paused && !gameOver) {
+      dropCounter += dt;
+      if (dropCounter > dropInterval) {
+        current.y++;
+        if (collide(grid, current)) {
+          current.y--;
+          lock();
+        }
+        dropCounter = 0;
+      }
+    }
+    render();
+    requestAnimationFrame(update);
+  }
+
+  function startGame() {
+    grid = newGrid();
+    score = 0; lines = 0; level = 1; combo = 0; tetrisCount = 0;
+    dropInterval = 800; dropCounter = 0; lastTime = 0;
+    holdPiece = null; canHold = true;
+    current = randPiece();
+    nextPiece = randPiece();
+    drawPreview(nextPiece, nextCtx, nextCv.width, nextCv.height);
+    drawPreview(null, holdCtx, holdCv.width, holdCv.height);
+    holdCtx.fillStyle = '#000'; holdCtx.fillRect(0,0,holdCv.width, holdCv.height);
+    particles = []; flames = []; shake = 0;
+    extinguishFire();
+    stats.games++;
+    saveStats();
+    gameOver = false; paused = false; running = true;
+    overlay.classList.remove('show');
+    startBtn.style.display = '';
+    updateHUD();
+    requestAnimationFrame(update);
+  }
+
+  function endGame() {
+    gameOver = true;
+    running = false;
+    extinguishFire();
+    saveStats();
+    overlayTitle.textContent = 'GAME OVER';
+    overlaySub.textContent = `Final Score: ${score}  ·  Press R or START to play again`;
+    startBtn.textContent = 'PLAY AGAIN';
+    overlay.classList.add('show');
+  }
+
+  function togglePause() {
+    if (gameOver || !running) return;
+    paused = !paused;
+    if (paused) {
+      overlayTitle.textContent = 'TIME OUT';
+      overlaySub.textContent = 'Press P to resume';
+      startBtn.style.display = 'none';
+      overlay.classList.add('show');
+    } else {
+      startBtn.style.display = '';
+      overlay.classList.remove('show');
+      lastTime = performance.now();
+      requestAnimationFrame(update);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'r' || e.key === 'R') { startGame(); return; }
+    if (!running && (e.code === 'Space' || e.key === 'Enter')) { startGame(); return; }
+    if (e.key === 'p' || e.key === 'P') { togglePause(); return; }
+    if (!running || paused || gameOver) return;
+    switch (e.key) {
+      case 'ArrowLeft': move(-1); break;
+      case 'ArrowRight': move(1); break;
+      case 'ArrowDown': softDrop(); break;
+      case 'ArrowUp':
+      case 'x': case 'X': tryRotate(1); break;
+      case 'z': case 'Z': tryRotate(-1); break;
+      case 'c': case 'C': hold(); break;
+      case ' ': e.preventDefault(); hardDrop(); break;
+    }
+  });
+
+  startBtn.addEventListener('click', startGame);
+
+  // Initial idle render with court visible
+  grid = newGrid();
+  drawCourt();
+  drawPreview(null, nextCtx, nextCv.width, nextCv.height);
+  drawPreview(null, holdCtx, holdCv.width, holdCv.height);
+})();
+</script>
+</body>
+</html>

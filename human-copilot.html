@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human Co-Pilot — AI That Works For Your Business</title>
+<meta name="description" content="Human Co-Pilot helps businesses put AI to work — real automations, real tools, real results. Built by humans, accelerated by AI.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #ff8c00;
+    --gold: #ffd700;
+    --ember: #ff4500;
+    --ink: #0d0d0f;
+    --card: #16161a;
+    --text: #e8e8ec;
+    --muted: #9a9aa3;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--ink);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .display { font-family: 'Impact', 'Arial Black', sans-serif; letter-spacing: 2px; }
+  .grad {
+    background: linear-gradient(90deg, var(--orange), var(--gold), var(--ember));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  a { color: var(--orange); }
+
+  /* ---- Hero ---- */
+  header {
+    position: relative;
+    min-height: 88vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255,140,0,0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,69,0,0.12), transparent),
+      var(--ink);
+    overflow: hidden;
+  }
+  .badge {
+    display: inline-block;
+    border: 1px solid rgba(255,140,0,0.5);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 13px; letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    background: rgba(255,140,0,0.08);
+  }
+  h1 {
+    font-size: clamp(40px, 7vw, 84px);
+    line-height: 1.05;
+    margin-bottom: 20px;
+    max-width: 16ch;
+  }
+  .sub {
+    font-size: clamp(17px, 2.2vw, 22px);
+    color: var(--muted);
+    max-width: 56ch;
+    margin-bottom: 40px;
+  }
+  .cta-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    display: inline-block;
+    padding: 16px 36px;
+    border-radius: 10px;
+    font-size: 18px; font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-3px); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--orange), var(--ember));
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(255,100,0,0.35);
+  }
+  .btn-primary:hover { box-shadow: 0 12px 40px rgba(255,100,0,0.55); }
+  .btn-ghost {
+    border: 2px solid rgba(255,140,0,0.6);
+    color: var(--gold);
+    background: rgba(255,140,0,0.06);
+  }
+  .scroll-hint { margin-top: 56px; color: var(--muted); font-size: 13px; letter-spacing: 2px; animation: bob 2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+
+  /* ---- Sections ---- */
+  section { padding: 90px 24px; max-width: 1080px; margin: 0 auto; }
+  .kicker { font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: var(--orange); margin-bottom: 12px; }
+  h2 { font-size: clamp(30px, 4.5vw, 46px); margin-bottom: 16px; }
+  .lede { color: var(--muted); font-size: 18px; max-width: 60ch; margin-bottom: 48px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 32px 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: rgba(255,140,0,0.4); transform: translateY(-4px); }
+  .card .icon { font-size: 36px; margin-bottom: 16px; display: block; }
+  .card h3 { font-size: 21px; margin-bottom: 10px; }
+  .card p { color: var(--muted); font-size: 15px; }
+
+  /* ---- Proof / demo ---- */
+  #proof { text-align: center; }
+  #proof .demo-frame {
+    background: var(--card);
+    border: 2px solid rgba(255,140,0,0.35);
+    border-radius: 16px;
+    padding: 44px 32px;
+    max-width: 760px;
+    margin: 0 auto;
+    box-shadow: 0 0 60px rgba(255,140,0,0.12);
+  }
+  #proof .demo-frame .big-emoji { font-size: 64px; display: block; margin-bottom: 12px; }
+  #proof .demo-frame h3 { font-size: 28px; margin-bottom: 12px; }
+  #proof .demo-frame p { color: var(--muted); margin-bottom: 26px; max-width: 52ch; margin-left:auto; margin-right:auto; }
+  .stat-row { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; margin: 28px 0; }
+  .stat-chip {
+    background: rgba(255,140,0,0.08);
+    border: 1px solid rgba(255,140,0,0.3);
+    border-radius: 10px;
+    padding: 14px 22px;
+    min-width: 140px;
+  }
+  .stat-chip .n { font-size: 28px; font-weight: 800; color: var(--gold); display: block; }
+  .stat-chip .l { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  /* ---- Process ---- */
+  .steps { counter-reset: step; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+  .step { position: relative; padding: 28px 24px 28px 24px; background: var(--card); border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); }
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute; top: -18px; left: 20px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), var(--ember));
+    color: #fff; font-weight: 800; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(255,100,0,0.4);
+  }
+  .step h3 { font-size: 18px; margin: 8px 0 8px; }
+  .step p { color: var(--muted); font-size: 14px; }
+
+  /* ---- Final CTA ---- */
+  #contact {
+    text-align: center;
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 110%, rgba(255,140,0,0.15), transparent);
+    max-width: none;
+  }
+  #contact .inner { max-width: 720px; margin: 0 auto; }
+  #contact h2 { margin-bottom: 14px; }
+  #contact .lede { margin-left: auto; margin-right: auto; margin-bottom: 36px; }
+
+  footer {
+    border-top: 1px solid rgba(255,140,0,0.25);
+    padding: 28px 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  footer a { font-weight: 600; text-decoration: none; }
+  footer a:hover { text-shadow: 0 0 10px rgba(255,140,0,0.5); }
+  footer .sep { margin: 0 10px; color: var(--orange); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+  .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AI + Human Expertise</div>
+  <h1 class="display">Your Business, <span class="grad">Supercharged by AI</span></h1>
+  <p class="sub">
+    Human Co-Pilot helps you put AI to work — custom tools, automations, and
+    workflows built in days, not months. A human expert in the pilot seat,
+    AI doing the heavy lifting.
+  </p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="https://human-co-pilot.com" target="_blank" rel="noopener">Work With Us →</a>
+    <a class="btn btn-ghost" href="#proof">See AI in Action 🏀</a>
+  </div>
+  <div class="scroll-hint">▼ SCROLL</div>
+</header>
+
+<section id="what" class="reveal">
+  <div class="kicker">What We Do</div>
+  <h2>AI that actually ships.</h2>
+  <p class="lede">
+    Most businesses know AI matters — few know where to start. We bridge that gap
+    with hands-on builds and practical strategy, not slideware.
+  </p>
+  <div class="grid">
+    <div class="card">
+      <span class="icon">⚙️</span>
+      <h3>Custom AI Tools</h3>
+      <p>Internal apps, assistants, and integrations built around the way your team already works — shipped fast and iterated with you.</p>
+    </div>
+    <div class="card">
+      <span class="icon">🔁</span>
+      <h3>Workflow Automation</h3>
+      <p>Kill the busywork. We map your repetitive processes and automate them end-to-end, freeing your people for high-value work.</p>
+    </div>
+    <div class="card">
+      <span class="icon">🧭</span>
+      <h3>AI Strategy & Training</h3>
+      <p>Know what's possible, what's hype, and what to do first. Practical roadmaps and team enablement from someone who builds daily.</p>
+    </div>
+  </div>
+</section>
+
+<section id="proof" class="reveal">
+  <div class="kicker">Proof, Not Promises</div>
+  <h2>This page — and a full game — built with AI.</h2>
+  <p class="lede" style="margin-left:auto;margin-right:auto;">
+    Don't take our word for it. Everything you're looking at was created through
+    human-directed AI collaboration. Here's a fully playable, basketball-themed
+    Tetris game we built the same way.
+  </p>
+  <div class="demo-frame">
+    <span class="big-emoji">🏀</span>
+    <h3 class="display grad">HOOPS TETRIS</h3>
+    <p>
+      Complete with NBA Jam "ON FIRE" mode, particle effects, persistent stats,
+      and arcade scoring — prompted by a human, built by AI, delivered in minutes.
+    </p>
+    <div class="stat-row">
+      <div class="stat-chip"><span class="n">&lt;1 hr</span><span class="l">Build Time</span></div>
+      <div class="stat-chip"><span class="n">0</span><span class="l">Dependencies</span></div>
+      <div class="stat-chip"><span class="n">1</span><span class="l">File to Run</span></div>
+    </div>
+    <a class="btn btn-primary" href="tetris.html">Play Hoops Tetris 🔥</a>
+  </div>
+</section>
+
+<section id="how" class="reveal">
+  <div class="kicker">How It Works</div>
+  <h2>From idea to impact in four steps.</h2>
+  <p class="lede">No six-month discovery phases. We move at AI speed with human judgment at every checkpoint.</p>
+  <div class="steps">
+    <div class="step">
+      <h3>Discover</h3>
+      <p>A quick conversation about where your time and money leak. We find the highest-ROI place to start.</p>
+    </div>
+    <div class="step">
+      <h3>Prototype</h3>
+      <p>Within days you see a working demo — not a deck. Real software you can click, test, and react to.</p>
+    </div>
+    <div class="step">
+      <h3>Refine</h3>
+      <p>We iterate together until it fits your workflow like a glove. You stay in the pilot seat the whole time.</p>
+    </div>
+    <div class="step">
+      <h3>Launch & Level Up</h3>
+      <p>Deploy, train your team, and identify the next win. Most clients find three more after the first.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="reveal">
+  <div class="inner">
+    <div class="kicker">Ready When You Are</div>
+    <h2 class="display">Let's find your <span class="grad">first AI win.</span></h2>
+    <p class="lede">
+      A 20-minute conversation is all it takes to spot where AI can save you hours
+      every week. No jargon, no pressure — just practical answers.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://human-co-pilot.com" target="_blank" rel="noopener">Visit Human-Co-Pilot.com →</a>
+      <a class="btn btn-ghost" href="https://bryantoberg.com" target="_blank" rel="noopener">Meet Bryant Oberg</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Powered by <a class="grad" href="https://human-co-pilot.com" target="_blank" rel="noopener">Human Co-Pilot</a>
+  <span class="sep">·</span>
+  Created by <a href="https://claude.ai" target="_blank" rel="noopener" style="color:#d97757;">Claude</a>
+  <span class="sep">·</span>
+  Prompted by <a href="https://bryantoberg.com" target="_blank" rel="noopener" style="color:#ffcc66;">Bryant Oberg</a>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
