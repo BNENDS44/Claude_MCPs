@@ -209,6 +209,84 @@
     box-shadow: inset 0 0 12px rgba(255,140,0,0.4);
   }
   .led { color: #ff4500; text-shadow: 0 0 8px #ff4500; font-weight: bold; }
+
+  /* Top scoreboard strip: shot clock + quarter + target */
+  #boardArea { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  #shotClockBar {
+    width: 300px;
+    background: #000;
+    border: 3px solid #ff8c00;
+    border-radius: 8px;
+    padding: 8px 12px 10px;
+    font-family: 'Courier New', monospace;
+    box-shadow: inset 0 0 14px rgba(255,140,0,0.4), 0 0 20px rgba(255,140,0,0.2);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: end;
+    gap: 4px 10px;
+  }
+  #shotClockBar .lbl {
+    font-size: 9px; letter-spacing: 2.5px;
+    color: #ffcc66;
+  }
+  #shotClockBar .val { font-size: 26px; font-weight: 900; line-height: 1; }
+  #shotClockBar .clockBox { text-align: left; }
+  #shotClockBar .qBox    { text-align: center; }
+  #shotClockBar .qBox .val { color: #ffd700; font-size: 22px; }
+  #shotClockBar .targetBox { text-align: right; font-size: 13px; }
+  #shotClockBar .targetBox .val { font-size: 14px; color: #fff; }
+  #shotClockBar .clockVal { color: #ff4500; text-shadow: 0 0 10px #ff4500; }
+  #shotClockBar .clockVal.warning {
+    color: #ffeb3b; text-shadow: 0 0 14px #ffeb3b;
+    animation: clockBlink 0.6s infinite;
+  }
+  #shotClockBar .clockVal.danger {
+    color: #ff1744; text-shadow: 0 0 16px #ff1744;
+    animation: clockBlink 0.3s infinite;
+  }
+  @keyframes clockBlink { 0%,100% { opacity:1; } 50% { opacity: 0.35; } }
+  #progressBar {
+    grid-column: 1 / -1;
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  #progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4500, #ffd700);
+    box-shadow: 0 0 8px #ffd700;
+    transition: width 0.25s ease-out;
+    width: 0%;
+  }
+
+  /* Fire timer display under the ON FIRE badge */
+  #fireTimerWrap {
+    display: none;
+    margin-top: 6px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #ffeb3b;
+    text-shadow: 0 0 6px #ff4500;
+  }
+  #fireTimerWrap.show { display: block; }
+  #fireTimerBar {
+    height: 5px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 3px;
+    border: 1px solid rgba(255,140,0,0.5);
+  }
+  #fireTimerFill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffeb3b, #ff4500);
+    box-shadow: 0 0 8px #ff4500;
+    transition: width 0.1s linear;
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -225,6 +303,10 @@
       <div class="stat"><span>LEVEL</span><span class="led" id="level">1</span></div>
       <div class="stat"><span>HIGH</span><span class="led" id="high">0</span></div>
       <div id="fireBadge">🔥 ON FIRE 🔥</div>
+      <div id="fireTimerWrap">
+        <span id="fireTimerVal">12.0s</span> · 2× POINTS
+        <div id="fireTimerBar"><div id="fireTimerFill"></div></div>
+      </div>
     </div>
     <div class="panel scoreboard">
       <h2>ALL-TIME</h2>
@@ -238,17 +320,34 @@
     </div>
   </div>
 
-  <div id="boardWrap">
-    <canvas id="board" width="300" height="600"></canvas>
-    <canvas id="fx" width="300" height="600"></canvas>
-    <canvas id="fireCanvas" width="300" height="600"></canvas>
-    <div id="flash"></div>
-    <div id="toast"></div>
-    <div id="onFire"><div class="big" id="fireBig">HE'S ON FIRE!</div><div class="sub" id="fireSub">★ BOOMSHAKALAKA ★</div></div>
-    <div id="overlay">
-      <h1 id="overlayTitle">TIP OFF!</h1>
-      <p id="overlaySub">Press SPACE or click START</p>
-      <button id="startBtn">START GAME</button>
+  <div id="boardArea">
+    <div id="shotClockBar">
+      <div class="clockBox">
+        <div class="lbl">SHOT CLOCK</div>
+        <div class="val clockVal" id="shotClockVal">1:00</div>
+      </div>
+      <div class="qBox">
+        <div class="lbl">QUARTER</div>
+        <div class="val" id="quarterVal">Q1</div>
+      </div>
+      <div class="targetBox">
+        <div class="lbl">TARGET</div>
+        <div class="val" id="targetVal">0 / 500</div>
+      </div>
+      <div id="progressBar"><div id="progressFill"></div></div>
+    </div>
+    <div id="boardWrap">
+      <canvas id="board" width="300" height="600"></canvas>
+      <canvas id="fx" width="300" height="600"></canvas>
+      <canvas id="fireCanvas" width="300" height="600"></canvas>
+      <div id="flash"></div>
+      <div id="toast"></div>
+      <div id="onFire"><div class="big" id="fireBig">HE'S ON FIRE!</div><div class="sub" id="fireSub">★ BOOMSHAKALAKA ★</div></div>
+      <div id="overlay">
+        <h1 id="overlayTitle">TIP OFF!</h1>
+        <p id="overlaySub">Press SPACE or click START</p>
+        <button id="startBtn">START GAME</button>
+      </div>
     </div>
   </div>
 
@@ -320,6 +419,13 @@
   const fireSub = document.getElementById('fireSub');
   const fireBadge = document.getElementById('fireBadge');
   const boardWrap = document.getElementById('boardWrap');
+  const shotClockVal = document.getElementById('shotClockVal');
+  const quarterVal = document.getElementById('quarterVal');
+  const targetVal = document.getElementById('targetVal');
+  const progressFill = document.getElementById('progressFill');
+  const fireTimerWrap = document.getElementById('fireTimerWrap');
+  const fireTimerVal = document.getElementById('fireTimerVal');
+  const fireTimerFill = document.getElementById('fireTimerFill');
 
   // Classic NBA Jam announcer calls (Tim Kitzrow)
   const JAM_CALLS = [
@@ -346,6 +452,32 @@
     return JAM_CALLS[i];
   }
 
+  // Slam dunk celebrations (Tetris / 4-line clear only)
+  const DUNK_CALLS = [
+    "POSTERIZED!",
+    "TOMAHAWK JAM!",
+    "WINDMILL SLAM!",
+    "360 SLAM!",
+    "RIM-RATTLER!",
+    "EMPHATIC SLAM!",
+    "THUNDEROUS!",
+    "OFF THE BACKBOARD!",
+    "FACIAL!",
+    "GET THAT OUT OF HERE!",
+    "REJECTED THE LAWS OF PHYSICS!",
+    "CRADLE JAM!",
+    "ALLEY-OOP!",
+    "ROCK THE BABY!",
+  ];
+  let lastDunkIdx = -1;
+  function pickDunkCall() {
+    let i;
+    do { i = Math.floor(Math.random() * DUNK_CALLS.length); }
+    while (i === lastDunkIdx && DUNK_CALLS.length > 1);
+    lastDunkIdx = i;
+    return DUNK_CALLS[i];
+  }
+
   // 7 tetrominoes, each shaded as a basketball
   const PIECES = {
     I: { color: '#ff8c00', shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]] },
@@ -366,7 +498,16 @@
   let flames = [];
   let shake = 0;
   let onFire = false;
-  let onFireRemaining = 0; // # of subsequent line clears that keep fire alive
+  let fireTimerMs = 0;
+  let consecutiveScoringLocks = 0; // 3-in-a-row scoring locks → ON FIRE
+
+  // Shot clock + quarter / target progression
+  const FIRE_DURATION_MS = 12000;       // 12s of ON FIRE per ignite
+  const SHOT_CLOCK_MS = 60000;          // 60s per quarter
+  const QUARTER_TARGETS = [500, 1500, 3500, 6500]; // cumulative score targets Q1-Q4
+  let shotClockMs = SHOT_CLOCK_MS;
+  let quarter = 1;
+  let targetScore = QUARTER_TARGETS[0];
 
   // Persistent stats across sessions
   const STORE_KEY = 'hoopsTetrisStats_v2';
@@ -627,10 +768,8 @@
 
   function clearLines() {
     let cleared = 0;
-    const clearedRows = [];
     for (let y = ROWS - 1; y >= 0; y--) {
       if (grid[y].every(v => v)) {
-        clearedRows.push(y);
         spawnParticles(y, grid[y][0]);
         grid.splice(y, 1);
         grid.unshift(Array(COLS).fill(0));
@@ -653,58 +792,77 @@
       if (cleared === 4) {
         tetrisCount++;
         stats.totalTetrises++;
-        shake = 14;
-        flashScreen();
-        igniteFire();        // NBA Jam "ON FIRE!" mode (rotates phrases)
-        showToast('SLAM DUNK!');
-      } else if (cleared === 3) {
-        showToast('TRIPLE!');
-        shake = 8;
-      } else if (cleared === 2) {
-        showToast('DOUBLE!');
-        shake = 5;
-      } else {
-        showToast('SWISH!');
-        shake = 3;
-      }
-      if (combo >= 3) showToast(`COMBO x${combo}!`);
-      // While on fire, every clear extends the fire a bit
-      if (onFire) {
-        onFireRemaining = Math.max(onFireRemaining, 3);
       }
     } else {
       combo = 0;
-      // If they go cold (a lock with no clears), tick fire down
-      if (onFire) {
-        onFireRemaining--;
-        if (onFireRemaining <= 0) extinguishFire();
-      }
     }
     saveStats();
     updateHUD();
+    return cleared;
   }
 
-  function igniteFire() {
+  function igniteFire(showCall = true) {
     onFire = true;
-    onFireRemaining = 4;
+    fireTimerMs = FIRE_DURATION_MS;
     boardWrap.classList.add('fire');
     fireBadge.classList.add('show');
-    const call = pickJamCall();
-    fireBig.textContent = call.big;
-    fireSub.textContent = call.sub;
-    onFireEl.classList.remove('show');
-    void onFireEl.offsetWidth; // restart CSS transition
-    onFireEl.classList.add('show');
-    setTimeout(() => onFireEl.classList.remove('show'), 1500);
+    fireTimerWrap.classList.add('show');
+    if (showCall) {
+      const call = pickJamCall();
+      fireBig.textContent = call.big;
+      fireSub.textContent = call.sub;
+      onFireEl.classList.remove('show');
+      void onFireEl.offsetWidth; // restart CSS transition
+      onFireEl.classList.add('show');
+      setTimeout(() => onFireEl.classList.remove('show'), 1500);
+    }
   }
 
   function extinguishFire() {
+    if (!onFire) {
+      // still make sure UI is clean
+      fireBadge.classList.remove('show');
+      fireTimerWrap.classList.remove('show');
+      return;
+    }
     onFire = false;
-    onFireRemaining = 0;
+    fireTimerMs = 0;
     boardWrap.classList.remove('fire');
     fireBadge.classList.remove('show');
+    fireTimerWrap.classList.remove('show');
     flames = [];
     fireCtx.clearRect(0, 0, fire.width, fire.height);
+    showToast('COOLED OFF');
+  }
+
+  function updateClockUI() {
+    // Shot clock display: minutes:seconds, plus tenths in last 10 seconds
+    const sec = Math.max(0, shotClockMs / 1000);
+    const m = Math.floor(sec / 60);
+    const whole = Math.floor(sec);
+    let txt;
+    if (sec >= 10) {
+      const s = whole % 60;
+      txt = `${m}:${String(s).padStart(2, '0')}`;
+    } else {
+      const tenths = Math.floor((sec - Math.floor(sec)) * 10);
+      txt = `0:0${whole}.${tenths}`;
+    }
+    shotClockVal.textContent = txt;
+    shotClockVal.classList.remove('warning', 'danger');
+    if (sec <= 10) shotClockVal.classList.add('danger');
+    else if (sec <= 20) shotClockVal.classList.add('warning');
+
+    quarterVal.textContent = quarter <= 4 ? `Q${quarter}` : `OT${quarter - 4}`;
+    targetVal.textContent = `${score} / ${targetScore}`;
+    const pct = Math.min(100, (score / targetScore) * 100);
+    progressFill.style.width = pct + '%';
+
+    if (onFire) {
+      const fs = Math.max(0, fireTimerMs / 1000);
+      fireTimerVal.textContent = fs.toFixed(1) + 's';
+      fireTimerFill.style.width = Math.max(0, (fireTimerMs / FIRE_DURATION_MS) * 100) + '%';
+    }
   }
 
   function spawnFlames() {
@@ -757,12 +915,76 @@
 
   function lock() {
     merge(grid, current);
-    clearLines();
+    const cleared = clearLines();
+
+    // Track 3-in-a-row scoring locks → ON FIRE
+    if (cleared >= 1) {
+      consecutiveScoringLocks++;
+    } else {
+      consecutiveScoringLocks = 0;
+    }
+
+    // Celebrations
+    if (cleared === 4) {
+      showSlamDunk();   // big SLAM DUNK overlay + dunk phrase
+    } else if (cleared === 3) {
+      showToast('TRIPLE!');
+    } else if (cleared === 2) {
+      showToast('DOUBLE!');
+    } else if (cleared === 1) {
+      showToast('SWISH!');
+    }
+
+    // Ignite fire on 3rd consecutive scoring lock (or refresh while on fire)
+    if (cleared >= 1) {
+      if (!onFire && consecutiveScoringLocks >= 3) {
+        igniteFire(cleared !== 4); // suppress jam text if slam dunk overlay is up
+        consecutiveScoringLocks = 0;
+      } else if (onFire) {
+        fireTimerMs = FIRE_DURATION_MS; // refresh timer on every scoring lock
+      }
+    }
+
+    if (combo >= 3 && cleared >= 1 && cleared !== 4) showToast(`COMBO x${combo}!`);
+
+    // Quarter progression (loop in case a Tetris vaults past multiple targets)
+    while (score >= targetScore && quarter < 99) advanceQuarter();
+
     current = nextPiece;
     nextPiece = randPiece();
     canHold = true;
     drawPreview(nextPiece, nextCtx, nextCv.width, nextCv.height);
-    if (collide(grid, current)) endGame();
+    if (collide(grid, current)) endGame('GAME OVER');
+  }
+
+  function showSlamDunk() {
+    const phrase = pickDunkCall();
+    fireBig.textContent = 'SLAM DUNK!';
+    fireSub.textContent = '★ ' + phrase + ' ★';
+    onFireEl.classList.remove('show');
+    void onFireEl.offsetWidth;
+    onFireEl.classList.add('show');
+    setTimeout(() => onFireEl.classList.remove('show'), 1600);
+    flashScreen();
+    shake = 14; // only big celebration shake; lock/hard-drop no longer shakes
+  }
+
+  function advanceQuarter() {
+    quarter++;
+    shotClockMs = SHOT_CLOCK_MS;
+    if (quarter <= QUARTER_TARGETS.length) {
+      targetScore = QUARTER_TARGETS[quarter - 1];
+    } else {
+      targetScore += 5000; // overtime — keep extending
+    }
+    flashScreen();
+    if (quarter === 4) {
+      showToast('Q4 — CHAMPIONSHIP!');
+    } else if (quarter > 4) {
+      showToast(`OT${quarter - 4} — TARGET ${targetScore}`);
+    } else {
+      showToast(`Q${quarter} — TARGET ${targetScore}`);
+    }
   }
 
   function move(dx) {
@@ -788,7 +1010,6 @@
     current.y--;
     score += Math.max(0, (dist - 1) * 2);
     lock();
-    shake = Math.max(shake, 4);
     dropCounter = 0;
   }
 
@@ -823,9 +1044,23 @@
 
   function update(time = 0) {
     if (!running) return;
-    const dt = time - lastTime;
+    // Cap dt so a long tab-switch or first frame doesn't drain timers
+    const rawDt = time - lastTime;
+    const dt = Math.min(rawDt, 50);
     lastTime = time;
     if (!paused && !gameOver) {
+      // Shot clock countdown — game ends when it hits zero
+      shotClockMs -= dt;
+      if (shotClockMs <= 0) {
+        shotClockMs = 0;
+        endGame('SHOT CLOCK!');
+      }
+      // Fire timer countdown
+      if (onFire) {
+        fireTimerMs -= dt;
+        if (fireTimerMs <= 0) extinguishFire();
+      }
+      // Piece gravity
       dropCounter += dt;
       if (dropCounter > dropInterval) {
         current.y++;
@@ -835,6 +1070,7 @@
         }
         dropCounter = 0;
       }
+      updateClockUI();
     }
     render();
     requestAnimationFrame(update);
@@ -843,31 +1079,43 @@
   function startGame() {
     grid = newGrid();
     score = 0; lines = 0; level = 1; combo = 0; tetrisCount = 0;
-    dropInterval = 800; dropCounter = 0; lastTime = 0;
+    dropInterval = 800; dropCounter = 0;
     holdPiece = null; canHold = true;
+    consecutiveScoringLocks = 0;
+    fireTimerMs = 0;
+    shotClockMs = SHOT_CLOCK_MS;
+    quarter = 1;
+    targetScore = QUARTER_TARGETS[0];
     current = randPiece();
     nextPiece = randPiece();
     drawPreview(nextPiece, nextCtx, nextCv.width, nextCv.height);
     drawPreview(null, holdCtx, holdCv.width, holdCv.height);
     holdCtx.fillStyle = '#000'; holdCtx.fillRect(0,0,holdCv.width, holdCv.height);
     particles = []; flames = []; shake = 0;
-    extinguishFire();
+    onFire = false;
+    boardWrap.classList.remove('fire');
+    fireBadge.classList.remove('show');
+    fireTimerWrap.classList.remove('show');
+    fireCtx.clearRect(0, 0, fire.width, fire.height);
     stats.games++;
     saveStats();
     gameOver = false; paused = false; running = true;
     overlay.classList.remove('show');
     startBtn.style.display = '';
     updateHUD();
+    updateClockUI();
+    lastTime = performance.now(); // avoid huge first-frame dt
     requestAnimationFrame(update);
   }
 
-  function endGame() {
+  function endGame(reason = 'GAME OVER') {
     gameOver = true;
     running = false;
     extinguishFire();
     saveStats();
-    overlayTitle.textContent = 'GAME OVER';
-    overlaySub.textContent = `Final Score: ${score}  ·  Press R or START to play again`;
+    overlayTitle.textContent = reason;
+    const stage = quarter <= 4 ? `Q${quarter}` : `OT${quarter - 4}`;
+    overlaySub.textContent = `Final Score: ${score}  ·  ${stage}  ·  Press R or START to play again`;
     startBtn.textContent = 'PLAY AGAIN';
     overlay.classList.add('show');
   }
@@ -909,9 +1157,12 @@
 
   // Initial idle render with court visible
   grid = newGrid();
+  score = 0; lines = 0; level = 1; combo = 0; tetrisCount = 0;
+  shotClockMs = SHOT_CLOCK_MS; quarter = 1; targetScore = QUARTER_TARGETS[0];
   drawCourt();
   drawPreview(null, nextCtx, nextCv.width, nextCv.height);
   drawPreview(null, holdCtx, holdCv.width, holdCv.height);
+  updateClockUI();
 })();
 </script>
 </body>
