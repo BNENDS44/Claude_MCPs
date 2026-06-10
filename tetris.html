@@ -6,7 +6,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    height: 100%;
+    min-height: 100%;
     font-family: 'Impact', 'Arial Black', sans-serif;
     background:
       radial-gradient(ellipse at center, #1a1a1a 0%, #000 80%),
@@ -15,12 +15,34 @@
     overflow: hidden;
     user-select: none;
   }
+  body { display: flex; flex-direction: column; height: 100vh; }
   #stage {
-    position: absolute; inset: 0;
+    flex: 1;
     display: flex; align-items: center; justify-content: center;
     gap: 24px;
     padding: 20px;
+    position: relative;
   }
+  #footer {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,1));
+    border-top: 2px solid #ff8c00;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #ccc;
+    box-shadow: 0 -4px 20px rgba(255,140,0,0.25);
+  }
+  #footer .brand {
+    background: linear-gradient(90deg, #ff8c00, #ffd700, #ff4500);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    letter-spacing: 3px;
+  }
+  #footer .name { color: #ffcc66; font-weight: bold; }
+  #footer .sep { color: #ff8c00; margin: 0 10px; }
   .panel {
     background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
     border: 4px solid #2a1810;
@@ -108,6 +130,72 @@
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   #toast.pop { opacity:1; transform: translate(-50%, -20px) scale(1); }
+
+  /* NBA Jam "ON FIRE" overlay */
+  #fireCanvas {
+    position: absolute; inset: 0; pointer-events: none;
+    z-index: 4;
+  }
+  #onFire {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 9;
+    pointer-events: none;
+    text-align: center;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #onFire.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #onFire .big {
+    font-size: 72px;
+    background: linear-gradient(180deg, #ffeb3b 0%, #ff9800 40%, #ff3d00 80%, #b71c1c 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+    text-shadow:
+      0 0 20px rgba(255,140,0,0.9),
+      0 0 40px rgba(255,69,0,0.7),
+      4px 4px 0 rgba(0,0,0,0.6);
+    animation: fireWobble 0.3s infinite alternate;
+  }
+  #onFire .sub {
+    font-size: 24px; letter-spacing: 8px; color: #ffeb3b;
+    text-shadow: 0 0 12px #ff4500, 2px 2px 0 #000;
+    margin-top: 4px;
+  }
+  @keyframes fireWobble {
+    from { transform: skewX(-3deg) scale(1); filter: brightness(1.1); }
+    to   { transform: skewX(3deg) scale(1.05); filter: brightness(1.4); }
+  }
+  #boardWrap.fire {
+    box-shadow:
+      0 0 80px rgba(255,69,0,0.9),
+      0 0 140px rgba(255,140,0,0.7),
+      inset 0 0 30px rgba(255,69,0,0.3);
+    border-color: #ff4500;
+    animation: firePulse 0.4s infinite alternate;
+  }
+  @keyframes firePulse {
+    from { box-shadow: 0 0 60px rgba(255,69,0,0.7), 0 0 120px rgba(255,140,0,0.5); }
+    to   { box-shadow: 0 0 100px rgba(255,200,0,1),  0 0 180px rgba(255,69,0,0.9); }
+  }
+  #fireBadge {
+    display: none;
+    background: linear-gradient(90deg, #ff4500, #ffd700, #ff4500);
+    background-size: 200% 100%;
+    animation: fireShine 1s linear infinite;
+    color: #000; font-weight: 900;
+    padding: 4px 10px; border-radius: 4px;
+    letter-spacing: 2px; font-size: 14px;
+    text-align: center; margin-top: 6px;
+    text-shadow: 0 0 4px rgba(255,255,255,0.5);
+    border: 2px solid #b71c1c;
+  }
+  @keyframes fireShine {
+    from { background-position: 200% 0; }
+    to   { background-position: 0 0; }
+  }
+  #fireBadge.show { display: block; }
   .scoreboard {
     background: #000; border: 3px solid #ff8c00;
     border-radius: 6px; padding: 8px;
@@ -130,6 +218,13 @@
       <div class="stat"><span>LINES</span><span class="led" id="lines">0</span></div>
       <div class="stat"><span>LEVEL</span><span class="led" id="level">1</span></div>
       <div class="stat"><span>HIGH</span><span class="led" id="high">0</span></div>
+      <div id="fireBadge">🔥 ON FIRE 🔥</div>
+    </div>
+    <div class="panel scoreboard">
+      <h2>ALL-TIME</h2>
+      <div class="stat"><span>TOTAL LINES</span><span class="led" id="totalLines">0</span></div>
+      <div class="stat"><span>TOTAL DUNKS</span><span class="led" id="totalTetrises">0</span></div>
+      <div class="stat"><span>GAMES</span><span class="led" id="totalGames">0</span></div>
     </div>
     <div class="panel">
       <h2>NEXT BALL</h2>
@@ -140,8 +235,10 @@
   <div id="boardWrap">
     <canvas id="board" width="300" height="600"></canvas>
     <canvas id="fx" width="300" height="600"></canvas>
+    <canvas id="fireCanvas" width="300" height="600"></canvas>
     <div id="flash"></div>
     <div id="toast"></div>
+    <div id="onFire"><div class="big">YOU'RE ON FIRE!</div><div class="sub">★ BOOMSHAKALAKA ★</div></div>
     <div id="overlay">
       <h1 id="overlayTitle">TIP OFF!</h1>
       <p id="overlaySub">Press SPACE or click START</p>
@@ -175,6 +272,14 @@
   </div>
 </div>
 
+<div id="footer">
+  Powered by <span class="brand">Human Co-Pilot</span>
+  <span class="sep">·</span>
+  Created by <span class="name">Claude</span>
+  <span class="sep">·</span>
+  Prompted by <span class="name">Bryant Oberg</span>
+</div>
+
 <script>
 (() => {
   const COLS = 10, ROWS = 20, SIZE = 30;
@@ -182,6 +287,8 @@
   const ctx = board.getContext('2d');
   const fx = document.getElementById('fx');
   const fxCtx = fx.getContext('2d');
+  const fire = document.getElementById('fireCanvas');
+  const fireCtx = fire.getContext('2d');
   const nextCv = document.getElementById('next');
   const nextCtx = nextCv.getContext('2d');
   const holdCv = document.getElementById('hold');
@@ -193,12 +300,18 @@
   const highEl  = document.getElementById('high');
   const comboEl = document.getElementById('combo');
   const tetrisEl= document.getElementById('tetrisCt');
+  const totalLinesEl = document.getElementById('totalLines');
+  const totalTetrisesEl = document.getElementById('totalTetrises');
+  const totalGamesEl = document.getElementById('totalGames');
   const overlay = document.getElementById('overlay');
   const overlayTitle = document.getElementById('overlayTitle');
   const overlaySub = document.getElementById('overlaySub');
   const startBtn = document.getElementById('startBtn');
   const flash = document.getElementById('flash');
   const toast = document.getElementById('toast');
+  const onFireEl = document.getElementById('onFire');
+  const fireBadge = document.getElementById('fireBadge');
+  const boardWrap = document.getElementById('boardWrap');
 
   // 7 tetrominoes, each shaded as a basketball
   const PIECES = {
@@ -213,14 +326,36 @@
   const KEYS = Object.keys(PIECES);
 
   let grid, current, nextPiece, holdPiece, canHold;
-  let score, lines, level, combo, tetrisCount, highScore;
+  let score, lines, level, combo, tetrisCount;
   let dropInterval, dropCounter, lastTime;
   let running, paused, gameOver;
   let particles = [];
+  let flames = [];
   let shake = 0;
+  let onFire = false;
+  let onFireRemaining = 0; // # of subsequent line clears that keep fire alive
 
-  highScore = parseInt(localStorage.getItem('hoopsTetrisHigh') || '0', 10);
-  highEl.textContent = highScore;
+  // Persistent stats across sessions
+  const STORE_KEY = 'hoopsTetrisStats_v2';
+  const stats = loadStats();
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) return Object.assign({ high:0, totalLines:0, totalTetrises:0, games:0 }, JSON.parse(raw));
+    } catch (e) {}
+    // Migrate from old key if present
+    const oldHigh = parseInt(localStorage.getItem('hoopsTetrisHigh') || '0', 10);
+    return { high: oldHigh, totalLines: 0, totalTetrises: 0, games: 0 };
+  }
+  function saveStats() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(stats)); } catch (e) {}
+  }
+
+  highEl.textContent = stats.high;
+  totalLinesEl.textContent = stats.totalLines;
+  totalTetrisesEl.textContent = stats.totalTetrises;
+  totalGamesEl.textContent = stats.games;
 
   function newGrid() {
     return Array.from({length: ROWS}, () => Array(COLS).fill(0));
@@ -415,6 +550,29 @@
       fxCtx.fill();
     }
     fxCtx.globalAlpha = 1;
+
+    // Flame layer (NBA Jam ON FIRE)
+    fireCtx.clearRect(0, 0, fire.width, fire.height);
+    if (onFire) {
+      spawnFlames();
+      fireCtx.globalCompositeOperation = 'lighter';
+      for (let i = flames.length - 1; i >= 0; i--) {
+        const f = flames[i];
+        f.x += f.vx; f.y += f.vy; f.vy *= 0.97; f.life--;
+        f.size *= 0.98;
+        if (f.life <= 0 || f.size < 1) { flames.splice(i, 1); continue; }
+        const a = Math.max(0, f.life / f.maxLife);
+        const grad = fireCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size);
+        grad.addColorStop(0, `hsla(${f.hue}, 100%, 70%, ${a})`);
+        grad.addColorStop(0.5, `hsla(${f.hue}, 100%, 50%, ${a * 0.6})`);
+        grad.addColorStop(1, `hsla(${f.hue}, 100%, 30%, 0)`);
+        fireCtx.fillStyle = grad;
+        fireCtx.beginPath();
+        fireCtx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+        fireCtx.fill();
+      }
+      fireCtx.globalCompositeOperation = 'source-over';
+    }
   }
 
   function spawnParticles(rowIndex, color) {
@@ -448,9 +606,11 @@
       }
     }
     if (cleared) {
-      const base = [0, 100, 300, 500, 800][cleared] * level;
+      let base = [0, 100, 300, 500, 800][cleared] * level;
+      if (onFire) base *= 2; // double points while on fire
       score += base;
       lines += cleared;
+      stats.totalLines += cleared;
       const newLevel = Math.floor(lines / 10) + 1;
       if (newLevel > level) {
         level = newLevel;
@@ -459,9 +619,11 @@
       combo++;
       if (cleared === 4) {
         tetrisCount++;
-        showToast('SLAM DUNK!');
-        shake = 12;
+        stats.totalTetrises++;
+        shake = 14;
         flashScreen();
+        igniteFire();        // NBA Jam "ON FIRE!" mode
+        showToast('SLAM DUNK!');
       } else if (cleared === 3) {
         showToast('TRIPLE!');
         shake = 8;
@@ -473,10 +635,55 @@
         shake = 3;
       }
       if (combo >= 3) showToast(`COMBO x${combo}!`);
+      // While on fire, every clear extends the fire a bit
+      if (onFire) {
+        onFireRemaining = Math.max(onFireRemaining, 3);
+      }
     } else {
       combo = 0;
+      // If they go cold (a lock with no clears), tick fire down
+      if (onFire) {
+        onFireRemaining--;
+        if (onFireRemaining <= 0) extinguishFire();
+      }
     }
+    saveStats();
     updateHUD();
+  }
+
+  function igniteFire() {
+    onFire = true;
+    onFireRemaining = 4;
+    boardWrap.classList.add('fire');
+    fireBadge.classList.add('show');
+    onFireEl.classList.add('show');
+    setTimeout(() => onFireEl.classList.remove('show'), 1400);
+  }
+
+  function extinguishFire() {
+    onFire = false;
+    onFireRemaining = 0;
+    boardWrap.classList.remove('fire');
+    fireBadge.classList.remove('show');
+    flames = [];
+    fireCtx.clearRect(0, 0, fire.width, fire.height);
+  }
+
+  function spawnFlames() {
+    if (!onFire) return;
+    // Emit flame particles from the bottom of the board
+    for (let i = 0; i < 6; i++) {
+      flames.push({
+        x: Math.random() * fire.width,
+        y: fire.height + Math.random() * 10,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: -1.5 - Math.random() * 2.5,
+        size: 6 + Math.random() * 10,
+        life: 50 + Math.random() * 30,
+        maxLife: 80,
+        hue: 10 + Math.random() * 40, // red-orange-yellow
+      });
+    }
   }
 
   function flashScreen() {
@@ -500,11 +707,14 @@
     levelEl.textContent = level;
     comboEl.textContent = combo;
     tetrisEl.textContent = tetrisCount;
-    if (score > highScore) {
-      highScore = score;
-      highEl.textContent = highScore;
-      localStorage.setItem('hoopsTetrisHigh', String(highScore));
+    if (score > stats.high) {
+      stats.high = score;
+      saveStats();
     }
+    highEl.textContent = stats.high;
+    totalLinesEl.textContent = stats.totalLines;
+    totalTetrisesEl.textContent = stats.totalTetrises;
+    totalGamesEl.textContent = stats.games;
   }
 
   function lock() {
@@ -602,9 +812,13 @@
     drawPreview(nextPiece, nextCtx, nextCv.width, nextCv.height);
     drawPreview(null, holdCtx, holdCv.width, holdCv.height);
     holdCtx.fillStyle = '#000'; holdCtx.fillRect(0,0,holdCv.width, holdCv.height);
-    particles = []; shake = 0;
+    particles = []; flames = []; shake = 0;
+    extinguishFire();
+    stats.games++;
+    saveStats();
     gameOver = false; paused = false; running = true;
     overlay.classList.remove('show');
+    startBtn.style.display = '';
     updateHUD();
     requestAnimationFrame(update);
   }
@@ -612,6 +826,8 @@
   function endGame() {
     gameOver = true;
     running = false;
+    extinguishFire();
+    saveStats();
     overlayTitle.textContent = 'GAME OVER';
     overlaySub.textContent = `Final Score: ${score}  ·  Press R or START to play again`;
     startBtn.textContent = 'PLAY AGAIN';
