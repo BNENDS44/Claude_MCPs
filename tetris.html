@@ -34,6 +34,11 @@
     color: #ccc;
     box-shadow: 0 -4px 20px rgba(255,140,0,0.25);
   }
+  #footer a {
+    text-decoration: none;
+    transition: filter 0.2s, text-shadow 0.2s;
+  }
+  #footer a:hover { filter: brightness(1.3); text-shadow: 0 0 8px rgba(255,140,0,0.6); }
   #footer .brand {
     background: linear-gradient(90deg, #ff8c00, #ffd700, #ff4500);
     -webkit-background-clip: text; background-clip: text;
@@ -42,6 +47,7 @@
     letter-spacing: 3px;
   }
   #footer .name { color: #ffcc66; font-weight: bold; }
+  #footer .claude { color: #d97757; font-weight: bold; }
   #footer .sep { color: #ff8c00; margin: 0 10px; }
   .panel {
     background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
@@ -238,7 +244,7 @@
     <canvas id="fireCanvas" width="300" height="600"></canvas>
     <div id="flash"></div>
     <div id="toast"></div>
-    <div id="onFire"><div class="big">YOU'RE ON FIRE!</div><div class="sub">★ BOOMSHAKALAKA ★</div></div>
+    <div id="onFire"><div class="big" id="fireBig">HE'S ON FIRE!</div><div class="sub" id="fireSub">★ BOOMSHAKALAKA ★</div></div>
     <div id="overlay">
       <h1 id="overlayTitle">TIP OFF!</h1>
       <p id="overlaySub">Press SPACE or click START</p>
@@ -273,11 +279,11 @@
 </div>
 
 <div id="footer">
-  Powered by <span class="brand">Human Co-Pilot</span>
+  Powered by <a class="brand" href="https://human-co-pilot.com" target="_blank" rel="noopener">Human Co-Pilot</a>
   <span class="sep">·</span>
-  Created by <span class="name">Claude</span>
+  Created by <a class="claude" href="https://claude.ai" target="_blank" rel="noopener">Claude</a>
   <span class="sep">·</span>
-  Prompted by <span class="name">Bryant Oberg</span>
+  Prompted by <a class="name" href="https://bryantoberg.com" target="_blank" rel="noopener">Bryant Oberg</a>
 </div>
 
 <script>
@@ -310,8 +316,35 @@
   const flash = document.getElementById('flash');
   const toast = document.getElementById('toast');
   const onFireEl = document.getElementById('onFire');
+  const fireBig = document.getElementById('fireBig');
+  const fireSub = document.getElementById('fireSub');
   const fireBadge = document.getElementById('fireBadge');
   const boardWrap = document.getElementById('boardWrap');
+
+  // Classic NBA Jam announcer calls (Tim Kitzrow)
+  const JAM_CALLS = [
+    { big: "HE'S ON FIRE!",         sub: "★ BOOMSHAKALAKA ★" },
+    { big: "BOOMSHAKALAKA!",        sub: "★ FROM DOWNTOWN ★" },
+    { big: "IS IT THE SHOES?!",     sub: "★ RAZZLE DAZZLE ★" },
+    { big: "RAZZLE DAZZLE!",        sub: "★ KABOOM ★" },
+    { big: "FROM DOWNTOWN!",        sub: "★ MONSTER JAM ★" },
+    { big: "KABOOM!",               sub: "★ HE'S HEATING UP ★" },
+    { big: "MONSTER JAM!",          sub: "★ JAMS IT IN ★" },
+    { big: "JAMS IT IN!",           sub: "★ WITH AUTHORITY ★" },
+    { big: "WITH AUTHORITY!",       sub: "★ HE'S ON FIRE ★" },
+    { big: "WITH NO REGARD FOR HUMAN LIFE!", sub: "★ BOOMSHAKALAKA ★" },
+    { big: "HE'S HEATING UP!",      sub: "★ IS IT THE SHOES ★" },
+    { big: "THE NAIL IN THE COFFIN!", sub: "★ GAME OVER FOR THEM ★" },
+    { big: "WHIRLWIND!",            sub: "★ RAZZLE DAZZLE ★" },
+  ];
+  let lastJamIdx = -1;
+  function pickJamCall() {
+    let i;
+    do { i = Math.floor(Math.random() * JAM_CALLS.length); }
+    while (i === lastJamIdx && JAM_CALLS.length > 1);
+    lastJamIdx = i;
+    return JAM_CALLS[i];
+  }
 
   // 7 tetrominoes, each shaded as a basketball
   const PIECES = {
@@ -622,7 +655,7 @@
         stats.totalTetrises++;
         shake = 14;
         flashScreen();
-        igniteFire();        // NBA Jam "ON FIRE!" mode
+        igniteFire();        // NBA Jam "ON FIRE!" mode (rotates phrases)
         showToast('SLAM DUNK!');
       } else if (cleared === 3) {
         showToast('TRIPLE!');
@@ -656,8 +689,13 @@
     onFireRemaining = 4;
     boardWrap.classList.add('fire');
     fireBadge.classList.add('show');
+    const call = pickJamCall();
+    fireBig.textContent = call.big;
+    fireSub.textContent = call.sub;
+    onFireEl.classList.remove('show');
+    void onFireEl.offsetWidth; // restart CSS transition
     onFireEl.classList.add('show');
-    setTimeout(() => onFireEl.classList.remove('show'), 1400);
+    setTimeout(() => onFireEl.classList.remove('show'), 1500);
   }
 
   function extinguishFire() {
