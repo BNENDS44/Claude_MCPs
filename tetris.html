@@ -141,7 +141,81 @@
   .themeCard.active { border-color: var(--secondary); box-shadow: 0 0 16px rgba(255,215,0,0.5); background: linear-gradient(180deg, #2a2a2a, #111); }
   .themeCard .icon { font-size: 30px; line-height: 1; }
   .themeCard .name { font-size: 11px; letter-spacing: 1.5px; margin-top: 4px; color: var(--accent); }
+  .themeCard.custom { border-style: dashed; }
   #title svg { display: block; margin: 0 auto; width: 100%; height: auto; max-width: 160px; }
+
+  /* Custom theme modal */
+  #themeModal {
+    position: fixed; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.9);
+    z-index: 50;
+    padding: 20px;
+  }
+  #themeModal.show { display: flex; }
+  #themeModal .inner {
+    background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
+    border: 3px solid var(--primary);
+    border-radius: 12px;
+    padding: 22px;
+    width: 100%;
+    max-width: 640px;
+    box-shadow: 0 0 40px rgba(255,140,0,0.4);
+    color: #eee;
+    font-family: 'Arial', sans-serif;
+  }
+  #themeModal h2 {
+    font-family: 'Impact', sans-serif;
+    font-size: 26px;
+    letter-spacing: 4px;
+    color: var(--secondary);
+    margin-bottom: 6px;
+  }
+  #themeModal .lede { font-size: 13px; color: #bbb; margin-bottom: 14px; line-height: 1.5; }
+  #themeModal textarea {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    color: #e6f0ff;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: vertical;
+  }
+  #themeModal textarea:focus { outline: none; border-color: var(--primary); }
+  #themeModal .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  #themeModal button {
+    background: linear-gradient(180deg, var(--primary), #b85a00);
+    border: 2px solid var(--panel-border);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Impact', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  #themeModal button.secondary { background: #1a1a1a; border-color: #444; color: var(--accent); }
+  #themeModal button:hover { transform: translateY(-1px); }
+  #themeModal .exportRow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; font-size: 11px; color: #aaa; align-items: center; }
+  #themeModal .exportRow span { color: var(--accent); letter-spacing: 2px; margin-right: 4px; }
+  #themeModal .exportBtn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #ddd;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: 'Arial', sans-serif;
+  }
+  #themeModal .exportBtn:hover { border-color: var(--secondary); color: var(--secondary); }
+  #themeModal .status { margin-top: 10px; font-size: 12px; min-height: 16px; }
+  #themeModal .status.ok    { color: #34d399; }
+  #themeModal .status.err   { color: #f87171; }
   #flash {
     position: absolute; inset: 0; pointer-events: none;
     z-index: 5; opacity: 0;
@@ -393,6 +467,26 @@
       <div class="stat"><span data-label="streak">STREAK</span><span class="led" id="combo">0</span></div>
       <div class="stat"><span data-label="tetris">TETRIS</span><span class="led" id="tetrisCt">0</span></div>
     </div>
+  </div>
+</div>
+
+<div id="themeModal">
+  <div class="inner">
+    <h2>CUSTOM THEME</h2>
+    <p class="lede">
+      Paste a theme JSON to brand the game for any client. Missing fields fall back to Basketball.
+      Custom themes are saved in this browser and stay available across sessions.
+      Use the export buttons below to grab a built-in theme as a starting point.
+    </p>
+    <textarea id="themeJSON" spellcheck="false" placeholder='{ "id": "acme", "name": "ACME Inc", "icon": "🚀", "title": "ACME", "subtitle": "★ TETRIS ★", "labels": { "scoreboard": "DASHBOARD", ... }, "celebrations": { "tetrisBig": "BIG WIN!", "tetrisCalls": ["NAILED IT!", "SHIPPED IT!"], "onFireCalls": [{ "big": "ON FIRE!", "sub": "★ MOMENTUM ★" }] } }'></textarea>
+    <div class="row">
+      <button id="themeLoadBtn">LOAD &amp; PLAY</button>
+      <button id="themeSaveBtn">SAVE TO LIBRARY</button>
+      <button class="secondary" id="themeShareBtn">COPY SHARE LINK</button>
+      <button class="secondary" id="themeCloseBtn">CLOSE</button>
+    </div>
+    <div class="exportRow"><span>EXPORT:</span><span id="exportBtns"></span></div>
+    <div class="status" id="themeStatus"></div>
   </div>
 </div>
 
@@ -897,13 +991,147 @@
     themePickerEl.innerHTML = '';
     Object.values(THEMES).forEach(t => {
       const card = document.createElement('div');
-      card.className = 'themeCard';
+      card.className = 'themeCard' + (t.custom ? ' custom' : '');
       card.dataset.theme = t.id;
       card.innerHTML = `<div class="icon">${t.icon}</div><div class="name">${t.name.toUpperCase()}</div>`;
       card.addEventListener('click', () => applyTheme(t.id));
       themePickerEl.appendChild(card);
     });
+    // "+ CUSTOM" card opens the JSON paste modal
+    const addCard = document.createElement('div');
+    addCard.className = 'themeCard custom';
+    addCard.dataset.theme = '__add__';
+    addCard.innerHTML = `<div class="icon">＋</div><div class="name">CUSTOM</div>`;
+    addCard.addEventListener('click', openThemeModal);
+    themePickerEl.appendChild(addCard);
   }
+
+  // ============ CUSTOM THEME ENGINE ============
+  // Base theme used to fill in any missing fields on a custom JSON
+  function baseDefaults() {
+    return JSON.parse(JSON.stringify(THEMES.basketball));
+  }
+  function mergeTheme(custom) {
+    const base = baseDefaults();
+    const out = Object.assign({}, base, custom);
+    // Deep-merge nested objects so partial overrides work
+    out.cssVars      = Object.assign({}, base.cssVars,      custom.cssVars || {});
+    out.pieceColors  = Object.assign({}, base.pieceColors,  custom.pieceColors || {});
+    out.labels       = Object.assign({}, base.labels,       custom.labels || {});
+    out.celebrations = Object.assign({}, base.celebrations, custom.celebrations || {});
+    out.custom = true;
+    if (!out.id || !out.id.startsWith('custom:')) {
+      out.id = 'custom:' + (custom.id || (custom.name || 'theme').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+    }
+    return out;
+  }
+
+  function loadCustomThemes() {
+    try {
+      const raw = localStorage.getItem('themeTetrisCustom');
+      if (!raw) return;
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) {
+        list.forEach(t => { const m = mergeTheme(t); THEMES[m.id] = m; });
+      }
+    } catch (e) { console.warn('Failed to load custom themes', e); }
+  }
+  function saveCustomTheme(custom) {
+    const merged = mergeTheme(custom);
+    THEMES[merged.id] = merged;
+    try {
+      const raw = localStorage.getItem('themeTetrisCustom');
+      const list = raw ? JSON.parse(raw) : [];
+      const idx = list.findIndex(t => (t.id && ('custom:' + t.id === merged.id || t.id === merged.id)) || (t.name === custom.name));
+      if (idx >= 0) list[idx] = custom; else list.push(custom);
+      localStorage.setItem('themeTetrisCustom', JSON.stringify(list));
+    } catch (e) { console.warn('Failed to save custom theme', e); }
+    return merged;
+  }
+
+  // Base64 encode/decode that survives unicode in JSON
+  function encodeTheme(obj) {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+  }
+  function decodeTheme(b64) {
+    return JSON.parse(decodeURIComponent(escape(atob(b64))));
+  }
+
+  // ============ THEME MODAL ============
+  const themeModal = document.getElementById('themeModal');
+  const themeJSON = document.getElementById('themeJSON');
+  const themeStatus = document.getElementById('themeStatus');
+  const exportBtnsEl = document.getElementById('exportBtns');
+
+  function setStatus(msg, kind) {
+    themeStatus.textContent = msg;
+    themeStatus.className = 'status ' + (kind || '');
+  }
+  function openThemeModal() {
+    // Pre-fill with the current theme as a starting point
+    themeJSON.value = JSON.stringify(themeForExport(theme), null, 2);
+    setStatus('', '');
+    populateExportButtons();
+    themeModal.classList.add('show');
+    themeJSON.focus();
+  }
+  function closeThemeModal() { themeModal.classList.remove('show'); }
+  function themeForExport(t) {
+    // Strip helper fields, keep config
+    const { custom, ...rest } = t;
+    return rest;
+  }
+  function populateExportButtons() {
+    exportBtnsEl.innerHTML = '';
+    Object.values(THEMES).forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'exportBtn';
+      btn.textContent = (t.icon ? t.icon + ' ' : '') + t.name;
+      btn.addEventListener('click', () => {
+        themeJSON.value = JSON.stringify(themeForExport(t), null, 2);
+        setStatus(`Loaded ${t.name} into the editor.`, 'ok');
+      });
+      exportBtnsEl.appendChild(btn);
+    });
+  }
+  function tryParseInputTheme() {
+    let raw;
+    try { raw = JSON.parse(themeJSON.value); }
+    catch (e) { setStatus('Invalid JSON: ' + e.message, 'err'); return null; }
+    if (!raw || typeof raw !== 'object') { setStatus('Theme must be a JSON object.', 'err'); return null; }
+    if (!raw.name) { setStatus('Theme needs a "name" field.', 'err'); return null; }
+    return raw;
+  }
+  document.getElementById('themeLoadBtn').addEventListener('click', () => {
+    const raw = tryParseInputTheme(); if (!raw) return;
+    const merged = mergeTheme(raw);
+    THEMES[merged.id] = merged;
+    buildThemePicker();
+    applyTheme(merged.id);
+    setStatus(`Loaded "${merged.name}" for this session.`, 'ok');
+    setTimeout(closeThemeModal, 700);
+  });
+  document.getElementById('themeSaveBtn').addEventListener('click', () => {
+    const raw = tryParseInputTheme(); if (!raw) return;
+    const merged = saveCustomTheme(raw);
+    buildThemePicker();
+    applyTheme(merged.id);
+    setStatus(`Saved "${merged.name}" to the library.`, 'ok');
+    setTimeout(closeThemeModal, 700);
+  });
+  document.getElementById('themeShareBtn').addEventListener('click', () => {
+    const raw = tryParseInputTheme(); if (!raw) return;
+    const url = `${location.origin}${location.pathname}?themeData=${encodeTheme(raw)}`;
+    navigator.clipboard?.writeText(url).then(
+      () => setStatus('Share link copied to clipboard.', 'ok'),
+      () => { themeJSON.value = url; setStatus('Copy failed — link placed in the box.', 'err'); }
+    );
+  });
+  document.getElementById('themeCloseBtn').addEventListener('click', closeThemeModal);
+  themeModal.addEventListener('click', (e) => { if (e.target === themeModal) closeThemeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && themeModal.classList.contains('show')) closeThemeModal();
+  });
 
   function pickOnFire() {
     const pool = theme.celebrations.onFireCalls;
@@ -1992,9 +2220,27 @@
   themeSwap.addEventListener('click', openThemePicker);
 
   // ============ INIT ============
+  loadCustomThemes(); // pull any saved client themes from localStorage
+  // ?themeData=<base64-json> injects a one-off theme (great for shareable client links)
+  const urlParams = new URLSearchParams(location.search);
+  let initialTheme = null;
+  if (urlParams.has('themeData')) {
+    try {
+      const injected = decodeTheme(urlParams.get('themeData'));
+      const merged = mergeTheme(injected);
+      THEMES[merged.id] = merged;
+      initialTheme = merged.id;
+    } catch (e) { console.warn('Failed to decode themeData param', e); }
+  }
+  // ?theme=<id> selects an existing (built-in or saved) theme
+  if (!initialTheme && urlParams.has('theme')) {
+    const t = urlParams.get('theme');
+    if (THEMES[t]) initialTheme = t;
+    else if (THEMES['custom:' + t]) initialTheme = 'custom:' + t;
+  }
   buildThemePicker();
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } })();
-  applyTheme(THEMES[savedTheme] ? savedTheme : 'basketball');
+  applyTheme(initialTheme || (THEMES[savedTheme] ? savedTheme : 'basketball'));
 
   highEl.textContent = stats.high;
   totalLinesEl.textContent = stats.totalLines;
