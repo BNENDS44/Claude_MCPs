@@ -123,26 +123,25 @@
   #overlay button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,140,0,0.5); }
   #themePicker {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 8px;
     width: 100%;
-    max-width: 380px;
+    max-width: 460px;
   }
   .themeCard {
     background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
     border: 2px solid #444;
     border-radius: 8px;
-    padding: 14px 8px 10px;
+    padding: 10px 6px 8px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
   }
   .themeCard:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 6px 18px rgba(255,140,0,0.35); }
   .themeCard.active { border-color: var(--secondary); box-shadow: 0 0 16px rgba(255,215,0,0.5); background: linear-gradient(180deg, #2a2a2a, #111); }
-  .themeCard .icon { font-size: 38px; line-height: 1; }
-  .themeCard .name {
-    font-size: 14px; letter-spacing: 2px; margin-top: 6px; color: var(--accent);
-  }
+  .themeCard .icon { font-size: 30px; line-height: 1; }
+  .themeCard .name { font-size: 11px; letter-spacing: 1.5px; margin-top: 4px; color: var(--accent); }
+  #title svg { display: block; margin: 0 auto; width: 100%; height: auto; max-width: 160px; }
   #flash {
     position: absolute; inset: 0; pointer-events: none;
     z-index: 5; opacity: 0;
@@ -530,6 +529,235 @@
       },
       fxStyle: 'sparkle',
     },
+
+    hockey: {
+      id: 'hockey',
+      name: 'Hockey',
+      icon: '🏒',
+      title: 'RINK',
+      subtitle: '★ TETRIS ★',
+      cssVars: {
+        '--primary':'#2563eb', '--secondary':'#e0f2fe', '--ember':'#dc2626',
+        '--accent':'#93c5fd', '--bg-from':'#0c1929', '--bg-to':'#000',
+        '--panel-from':'#1e3a8a', '--panel-to':'#172554', '--panel-border':'#0c1929',
+      },
+      board: 'ice',
+      pieceStyle: 'puck',
+      pieceColors: { I:'#60a5fa', O:'#fbbf24', T:'#a78bfa', S:'#4ade80', Z:'#f87171', L:'#fb923c', J:'#f472b6' },
+      labels: {
+        scoreboard:'GAME SHEET', score:'SCORE', lines:'LINES', level:'LEVEL', high:'BEST',
+        allTime:'CAREER', totalLines:'TOTAL LINES', totalTetrises:'GOALS', games:'GAMES',
+        next:'NEXT PUCK', hold:'BENCH', controls:'CONTROLS', combo:'STREAK', streak:'RUN', tetris:'GOALS',
+        shotClock:'PERIOD CLOCK', quarter:'PERIOD', target:'GOAL',
+        tipOff:'DROP THE PUCK!', gameOver:'GAME OVER', timeExpired:'BUZZER!', pause:'TIMEOUT',
+        onFire:'🔥 HEATING UP 🔥', cooledOff:'COLD STREAK',
+      },
+      stages: ['1ST PERIOD','2ND PERIOD','3RD PERIOD','OVERTIME'], finalStage:'OVERTIME', overtimePrefix:'SHOOTOUT',
+      celebrations: {
+        single:'SHOT!', double:'BREAKAWAY!', triple:'HAT TRICK!', tetrisBig:'HE SHOOTS, HE SCORES!',
+        tetrisCalls: ['TOP SHELF!','BAR DOWN!','FIVE-HOLE!','GLOVE SIDE!','SNIPED IT!','WHERE MAMA HIDES THE COOKIES!','SAUCE!','TOE DRAG!','SNAPSHOT!','SLAPSHOT!','ONE-TIMER!','BACKHAND BEAUTY!','LIGHT THE LAMP!','TWINE TICKLER!'],
+        onFireCalls: [
+          { big: "HE'S HEATING UP!", sub: '★ TOP SHELF ★' },
+          { big: 'IN THE ZONE!', sub: '★ HAT TRICK INCOMING ★' },
+          { big: 'WHEELS!', sub: '★ FIVE-HOLE ★' },
+          { big: 'LIGHTS OUT!', sub: '★ BAR DOWN ★' },
+          { big: 'SNIPER MODE!', sub: '★ TOE DRAG ★' },
+          { big: 'UNREAL!', sub: '★ ONE-TIMER ★' },
+        ],
+      },
+      fxStyle: 'fire',
+    },
+
+    baseball: {
+      id: 'baseball',
+      name: 'Baseball',
+      icon: '⚾',
+      title: 'DIAMOND',
+      subtitle: '★ TETRIS ★',
+      cssVars: {
+        '--primary':'#a16207', '--secondary':'#fde047', '--ember':'#b91c1c',
+        '--accent':'#fef08a', '--bg-from':'#1c2410', '--bg-to':'#000',
+        '--panel-from':'#854d0e', '--panel-to':'#713f12', '--panel-border':'#422006',
+      },
+      board: 'diamond',
+      pieceStyle: 'baseball',
+      pieceColors: { I:'#dc2626', O:'#fde047', T:'#a78bfa', S:'#86efac', Z:'#fb7185', L:'#60a5fa', J:'#f472b6' },
+      labels: {
+        scoreboard:'BOX SCORE', score:'SCORE', lines:'HITS', level:'LEVEL', high:'BEST',
+        allTime:'CAREER', totalLines:'TOTAL HITS', totalTetrises:'HOMERS', games:'GAMES',
+        next:'ON DECK', hold:'DUGOUT', controls:'CONTROLS', combo:'STREAK', streak:'RBI', tetris:'HOMERS',
+        shotClock:'PITCH CLOCK', quarter:'INNING', target:'RUNS',
+        tipOff:'PLAY BALL!', gameOver:'GAME OVER', timeExpired:'STRIKE THREE!', pause:'TIMEOUT',
+        onFire:'🔥 RED HOT 🔥', cooledOff:'SLUMP',
+      },
+      stages: ['EARLY INNINGS','MIDDLE INNINGS','LATE INNINGS','EXTRA INNINGS'], finalStage:'EXTRAS', overtimePrefix:'XI',
+      celebrations: {
+        single:'BASE HIT!', double:'DOUBLE!', triple:'TRIPLE!', tetrisBig:'HOME RUN!',
+        tetrisCalls: ['GOING, GOING, GONE!','OUT OF THE PARK!','TAPE-MEASURE SHOT!','MOONSHOT!','GRAND SLAM!','SEE YA!','BACK BACK BACK!','UPPER DECK!','SPLASH HIT!','OPPO TACO!','CLUTCH!','LASER BEAM!','BOMB!','WALK-OFF!'],
+        onFireCalls: [
+          { big: 'RED HOT!', sub: '★ CONTACT MASTER ★' },
+          { big: 'HOT BAT!', sub: '★ SEE YA ★' },
+          { big: 'IN THE GROOVE!', sub: '★ BACK BACK BACK ★' },
+          { big: 'CRUSHING IT!', sub: '★ MOONSHOT ★' },
+          { big: 'CLUTCH MODE!', sub: '★ WALK-OFF READY ★' },
+          { big: 'BARREL HUNTER!', sub: '★ OPPO TACO ★' },
+        ],
+      },
+      fxStyle: 'fire',
+    },
+
+    office: {
+      id: 'office',
+      name: 'Office',
+      icon: '💼',
+      title: 'SYNERGY',
+      subtitle: '★ TETRIS ★',
+      cssVars: {
+        '--primary':'#0ea5e9', '--secondary':'#67e8f9', '--ember':'#f59e0b',
+        '--accent':'#bae6fd', '--bg-from':'#0f172a', '--bg-to':'#020617',
+        '--panel-from':'#334155', '--panel-to':'#1e293b', '--panel-border':'#0f172a',
+      },
+      board: 'cubicle',
+      pieceStyle: 'sticky',
+      pieceColors: { I:'#f472b6', O:'#fde047', T:'#c084fc', S:'#86efac', Z:'#fb923c', L:'#7dd3fc', J:'#fda4af' },
+      labels: {
+        scoreboard:'KPIs', score:'REVENUE', lines:'DELIVERABLES', level:'TIER', high:'PERSONAL BEST',
+        allTime:'TENURE', totalLines:'LIFETIME DELIVERABLES', totalTetrises:'PROMOTIONS', games:'QUARTERS',
+        next:'NEXT TICKET', hold:'PARKING LOT', controls:'CONTROLS', combo:'MOMENTUM', streak:'STREAK', tetris:'PROMOS',
+        shotClock:'SPRINT CLOCK', quarter:'QUARTER', target:'TARGET',
+        tipOff:'STAND-UP!', gameOver:'REORG', timeExpired:'EOQ — SHIPPED IT?', pause:'COFFEE BREAK',
+        onFire:'☕ CRUSHING IT ☕', cooledOff:'BURNED OUT',
+      },
+      stages: ['Q1 PLANNING','Q2 EXECUTION','Q3 CRUNCH','Q4 REVIEW'], finalStage:'BOARD MEETING', overtimePrefix:'FY+',
+      celebrations: {
+        single:'SHIPPED!', double:'DOUBLE WIN!', triple:'BOARD APPROVED!', tetrisBig:'PROMOTED!',
+        tetrisCalls: ['SYNERGY ACHIEVED!','MOVED THE NEEDLE!','CIRCLED BACK!','TOOK IT OFFLINE!','EMAIL ZERO!','LOOPED IN STAKEHOLDERS!','BOILED THE OCEAN!','LOW-HANGING FRUIT!','PINGED IT!','OFFSITE WORTHY!','QUARTERLY KPI HIT!','PARADIGM SHIFT!','BANDWIDTH FREED!','DECK NAILED IT!','SCALED IT!','VALUE-ADD!'],
+        onFireCalls: [
+          { big: 'CRUSHING Q!', sub: '★ KPI MACHINE ★' },
+          { big: 'FLOW STATE!', sub: '★ NO MEETINGS ★' },
+          { big: 'PROMOTED!', sub: '★ BOARD APPROVED ★' },
+          { big: 'TOP PERFORMER!', sub: '★ QUOTA SMASHED ★' },
+          { big: 'EXECUTIVE TRACK!', sub: '★ THOUGHT LEADER ★' },
+          { big: 'C-SUITE BOUND!', sub: '★ SYNERGY MAESTRO ★' },
+        ],
+      },
+      fxStyle: 'fire',
+    },
+
+    space: {
+      id: 'space',
+      name: 'Space',
+      icon: '🚀',
+      title: 'COSMOS',
+      subtitle: '★ TETRIS ★',
+      cssVars: {
+        '--primary':'#22d3ee', '--secondary':'#e879f9', '--ember':'#fb7185',
+        '--accent':'#a5f3fc', '--bg-from':'#0a0a2e', '--bg-to':'#000',
+        '--panel-from':'#1e1b4b', '--panel-to':'#0f0a30', '--panel-border':'#020029',
+      },
+      board: 'space',
+      pieceStyle: 'orb',
+      pieceColors: { I:'#22d3ee', O:'#fde047', T:'#e879f9', S:'#86efac', Z:'#fb7185', L:'#60a5fa', J:'#c084fc' },
+      labels: {
+        scoreboard:'TELEMETRY', score:'XP', lines:'TARGETS', level:'CLEARANCE', high:'RECORD',
+        allTime:'LOGBOOK', totalLines:'TOTAL TARGETS', totalTetrises:'SUPERNOVAS', games:'MISSIONS',
+        next:'INBOUND', hold:'CARGO BAY', controls:'CONTROLS', combo:'CHAIN', streak:'CHAIN', tetris:'SUPERNOVAS',
+        shotClock:'O2 RESERVE', quarter:'SECTOR', target:'OBJECTIVE',
+        tipOff:'LAUNCH!', gameOver:'MISSION FAILED', timeExpired:'OXYGEN DEPLETED!', pause:'GROUND CONTROL',
+        onFire:'🚀 WARP DRIVE 🚀', cooledOff:'COOLDOWN',
+      },
+      stages: ['SECTOR α','SECTOR β','SECTOR γ','SECTOR Ω'], finalStage:'SECTOR Ω', overtimePrefix:'DEEP SPACE',
+      celebrations: {
+        single:'DIRECT HIT!', double:'COMBO!', triple:'TRIPLE LOCK!', tetrisBig:'SUPERNOVA!',
+        tetrisCalls: ['WARP SPEED!','TO INFINITY!','STELLAR!','GALACTIC!','QUANTUM LEAP!','LIGHTSPEED!','EVENT HORIZON!','SINGULARITY!','HYPERDRIVE!','NEBULA RIDER!','STAR FORGE!','BLACK HOLE PUNCH!','COSMIC STRIKE!','BIG BANG!','ORBITAL!'],
+        onFireCalls: [
+          { big: 'WARP DRIVE!', sub: '★ HYPERSPACE ★' },
+          { big: 'STELLAR!', sub: '★ QUANTUM LEAP ★' },
+          { big: 'GALACTIC MODE!', sub: '★ EVENT HORIZON ★' },
+          { big: 'COSMIC POWER!', sub: '★ STAR FORGE ★' },
+          { big: 'INFINITY!', sub: '★ BIG BANG ★' },
+          { big: 'LIGHT YEARS AHEAD!', sub: '★ NEBULA RIDER ★' },
+        ],
+      },
+      fxStyle: 'fire',
+    },
+
+    hcp: {
+      id: 'hcp',
+      name: 'HCP / Learn',
+      icon: '🤖',
+      title: 'CO-PILOT',
+      subtitle: '★ LEARN MODE ★',
+      // Human Co-Pilot logo (inline SVG)
+      logo: `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" aria-label="Human Co-Pilot">
+        <defs>
+          <linearGradient id="hcpgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff8c00"/>
+            <stop offset="50%" stop-color="#ffd700"/>
+            <stop offset="100%" stop-color="#ff4500"/>
+          </linearGradient>
+        </defs>
+        <path d="M 70 22 L 100 8 L 130 22 L 130 32 L 100 18 L 70 32 Z" fill="url(#hcpgrad)"/>
+        <text x="100" y="58" font-size="26" font-weight="900" fill="url(#hcpgrad)" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" letter-spacing="4">HCP</text>
+        <text x="100" y="74" font-size="7" font-weight="700" fill="#ffcc66" text-anchor="middle" font-family="Arial,sans-serif" letter-spacing="2.5">HUMAN CO-PILOT</text>
+      </svg>`,
+      cssVars: {
+        '--primary':'#ff8c00', '--secondary':'#ffd700', '--ember':'#ff4500',
+        '--accent':'#ffcc66', '--bg-from':'#0a0e1f', '--bg-to':'#000',
+        '--panel-from':'#1e293b', '--panel-to':'#0f172a', '--panel-border':'#020617',
+      },
+      board: 'circuit',
+      pieceStyle: 'datacube',
+      pieceColors: { I:'#ff8c00', O:'#ffd700', T:'#22d3ee', S:'#34d399', Z:'#ff4500', L:'#60a5fa', J:'#f472b6' },
+      labels: {
+        scoreboard:'PROGRESS', score:'XP', lines:'LESSONS', level:'TIER', high:'BEST',
+        allTime:'LEARNING JOURNAL', totalLines:'TOTAL LESSONS', totalTetrises:'BREAKTHROUGHS', games:'SESSIONS',
+        next:'UP NEXT', hold:'BOOKMARK', controls:'CONTROLS', combo:'STREAK', streak:'FLOW', tetris:'INSIGHTS',
+        shotClock:'FOCUS TIMER', quarter:'STAGE', target:'GOAL',
+        tipOff:'READY TO LEARN?', gameOver:'SESSION OVER', timeExpired:'TIME UP!', pause:'BREAK',
+        onFire:'🤖 IN THE FLOW 🤖', cooledOff:'REGROUP',
+      },
+      stages: ['APPRENTICE','PRACTITIONER','EXPERT','CO-PILOT'], finalStage:'CO-PILOT', overtimePrefix:'MASTER',
+      celebrations: {
+        single:'LEARNED!', double:'INSIGHT!', triple:'BREAKTHROUGH!', tetrisBig:'EUREKA!',
+        // Each "slam dunk" surfaces a quick AI/learning lesson
+        tetrisCalls: [
+          'PROMPT MASTERED!',
+          'CONTEXT IS KING!',
+          'ITERATE TO ELEVATE!',
+          'AUTOMATE THE BORING!',
+          'TASTE > TOOLS!',
+          'SHIP, THEN POLISH!',
+          'FEEDBACK COMPOUNDS!',
+          'CLEAR BEATS CLEVER!',
+          'STRUCTURE BEATS VOLUME!',
+          'ONE BIG IDEA WINS!',
+          'AI AUGMENTS HUMANS!',
+          'GOOD ENOUGH SHIPS!',
+          'ASK BETTER QUESTIONS!',
+          'FIND THE LEVERAGE!',
+          'BUILT IT IN A DAY!',
+          'SMALL EXPERIMENTS WIN!',
+          'CURIOSITY > CERTAINTY!',
+          'CONSTRAINTS CREATE!',
+          'DEMO BEATS DECK!',
+          'PROMPT IS A PRODUCT!',
+        ],
+        onFireCalls: [
+          { big: 'FLOW STATE!',     sub: '★ DEEP WORK ★' },
+          { big: 'COMPOUND GAINS!', sub: '★ 1% BETTER DAILY ★' },
+          { big: 'FEEDBACK LOOP!',  sub: '★ ITERATE FAST ★' },
+          { big: 'PATTERN MATCH!',  sub: '★ TASTE IS THE EDGE ★' },
+          { big: 'CO-PILOT MODE!',  sub: '★ HUMAN + AI ★' },
+          { big: 'MOMENTUM!',       sub: '★ SMALL WINS STACK ★' },
+          { big: 'LEVERAGE!',       sub: '★ WORK SMARTER ★' },
+          { big: 'BREAKTHROUGH!',   sub: '★ CONNECT THE DOTS ★' },
+          { big: 'OUTPACED!',       sub: '★ AI-AUGMENTED ★' },
+          { big: 'CLARITY!',        sub: '★ FIRST PRINCIPLES ★' },
+        ],
+      },
+      fxStyle: 'fire',
+    },
   };
 
   // ============ DOM REFS ============
@@ -636,8 +864,12 @@
     // CSS variables
     const root = document.documentElement;
     Object.entries(theme.cssVars).forEach(([k, v]) => root.style.setProperty(k, v));
-    // Title and subtitle
-    titleEl.textContent = theme.title;
+    // Title (logo if present) and subtitle
+    if (theme.logo) {
+      titleEl.innerHTML = theme.logo;
+    } else {
+      titleEl.textContent = theme.title;
+    }
     subtitleEl.textContent = theme.subtitle;
     // Labels via data-label
     document.querySelectorAll('[data-label]').forEach(el => {
@@ -748,9 +980,16 @@
 
   // ============ BOARD RENDERERS ============
   function drawBoardBg(c = ctx) {
-    if (theme.board === 'grass') drawGrass(c);
-    else if (theme.board === 'candy') drawCandyFloor(c);
-    else drawHardwood(c);
+    switch (theme.board) {
+      case 'grass':   return drawGrass(c);
+      case 'candy':   return drawCandyFloor(c);
+      case 'ice':     return drawIce(c);
+      case 'diamond': return drawDiamond(c);
+      case 'cubicle': return drawCubicle(c);
+      case 'space':   return drawSpace(c);
+      case 'circuit': return drawCircuit(c);
+      default:        return drawHardwood(c);
+    }
   }
 
   function drawHardwood(c) {
@@ -826,11 +1065,208 @@
     }
   }
 
+  function drawIce(c) {
+    // Smooth ice
+    const g = c.createLinearGradient(0, 0, 0, ROWS*SIZE);
+    g.addColorStop(0, '#dbeefb');
+    g.addColorStop(1, '#b6d6e8');
+    c.fillStyle = g;
+    c.fillRect(0, 0, COLS*SIZE, ROWS*SIZE);
+    // Deterministic ice scratches
+    c.strokeStyle = 'rgba(255,255,255,0.6)';
+    c.lineWidth = 0.4;
+    for (let i = 0; i < 50; i++) {
+      const x = (i * 47) % (COLS*SIZE);
+      const y = (i * 89) % (ROWS*SIZE);
+      const len = 6 + (i % 8);
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + len, y + ((i%2)?1:-1)); c.stroke();
+    }
+    // Red center line
+    c.strokeStyle = '#dc2626';
+    c.lineWidth = 4;
+    c.beginPath(); c.moveTo(0, ROWS*SIZE/2); c.lineTo(COLS*SIZE, ROWS*SIZE/2); c.stroke();
+    // Blue lines
+    c.strokeStyle = '#2563eb';
+    c.lineWidth = 3;
+    c.beginPath(); c.moveTo(0, ROWS*SIZE/3); c.lineTo(COLS*SIZE, ROWS*SIZE/3); c.stroke();
+    c.beginPath(); c.moveTo(0, ROWS*SIZE*2/3); c.lineTo(COLS*SIZE, ROWS*SIZE*2/3); c.stroke();
+    // Center faceoff
+    c.strokeStyle = '#2563eb'; c.lineWidth = 2;
+    c.beginPath(); c.arc(COLS*SIZE/2, ROWS*SIZE/2, 40, 0, Math.PI*2); c.stroke();
+    c.fillStyle = '#dc2626';
+    c.beginPath(); c.arc(COLS*SIZE/2, ROWS*SIZE/2, 3, 0, Math.PI*2); c.fill();
+    // Corner faceoff circles
+    c.strokeStyle = '#dc2626'; c.lineWidth = 1.5;
+    [[60, 100],[COLS*SIZE-60, 100],[60, ROWS*SIZE-100],[COLS*SIZE-60, ROWS*SIZE-100]].forEach(([x,y]) => {
+      c.beginPath(); c.arc(x, y, 14, 0, Math.PI*2); c.stroke();
+      c.beginPath(); c.arc(x, y, 2, 0, Math.PI*2); c.fillStyle='#dc2626'; c.fill();
+    });
+  }
+
+  function drawDiamond(c) {
+    // Outfield grass everywhere
+    for (let y = 0; y < ROWS; y++) {
+      c.fillStyle = y % 2 === 0 ? '#1d6b2e' : '#155022';
+      c.fillRect(0, y*SIZE, COLS*SIZE, SIZE);
+    }
+    // Dirt infield band (middle of board)
+    const dirtTop = ROWS*SIZE*0.30, dirtBot = ROWS*SIZE*0.65;
+    const dirtGrad = c.createLinearGradient(0, dirtTop, 0, dirtBot);
+    dirtGrad.addColorStop(0, '#9a6235');
+    dirtGrad.addColorStop(1, '#7a4b27');
+    c.fillStyle = dirtGrad;
+    c.fillRect(0, dirtTop, COLS*SIZE, dirtBot - dirtTop);
+    // Diamond outline
+    const cx = COLS*SIZE/2, cy = ROWS*SIZE*0.475;
+    const dr = 65;
+    c.strokeStyle = '#fff'; c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(cx, cy - dr); c.lineTo(cx + dr, cy);
+    c.lineTo(cx, cy + dr); c.lineTo(cx - dr, cy);
+    c.closePath(); c.stroke();
+    // Bases
+    c.fillStyle = '#fff';
+    [[cx, cy - dr], [cx + dr, cy], [cx, cy + dr], [cx - dr, cy]].forEach(([x, y]) => {
+      c.fillRect(x - 4, y - 4, 8, 8);
+    });
+    // Pitcher's mound
+    c.fillStyle = 'rgba(255,255,255,0.45)';
+    c.beginPath(); c.arc(cx, cy, 7, 0, Math.PI*2); c.fill();
+    // Foul lines extending to outfield
+    c.strokeStyle = 'rgba(255,255,255,0.6)'; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(cx, cy + dr); c.lineTo(0, ROWS*SIZE); c.stroke();
+    c.beginPath(); c.moveTo(cx, cy + dr); c.lineTo(COLS*SIZE, ROWS*SIZE); c.stroke();
+  }
+
+  function drawCubicle(c) {
+    // Carpet tile floor
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        c.fillStyle = (x + y) % 2 === 0 ? '#3a3d4a' : '#2e3140';
+        c.fillRect(x * SIZE, y * SIZE, SIZE, SIZE);
+        // Carpet texture
+        c.fillStyle = 'rgba(0,0,0,0.08)';
+        for (let i = 0; i < 3; i++) {
+          const dx = ((x*7 + y*13 + i*19) % SIZE);
+          const dy = ((x*17 + y*5 + i*11) % SIZE);
+          c.fillRect(x*SIZE + dx, y*SIZE + dy, 1, 1);
+        }
+      }
+    }
+    // Cubicle walls (vertical dividers)
+    c.strokeStyle = 'rgba(120,160,200,0.22)';
+    c.lineWidth = 1.5;
+    for (let i = 1; i < 4; i++) {
+      const x = (COLS/4) * i * SIZE;
+      c.beginPath(); c.moveTo(x, 0); c.lineTo(x, ROWS*SIZE); c.stroke();
+    }
+    // Horizontal floor seam
+    c.strokeStyle = 'rgba(120,160,200,0.15)';
+    c.beginPath(); c.moveTo(0, ROWS*SIZE/2); c.lineTo(COLS*SIZE, ROWS*SIZE/2); c.stroke();
+    // Coffee stain
+    const stainGrad = c.createRadialGradient(70, 410, 2, 70, 410, 14);
+    stainGrad.addColorStop(0, 'rgba(101,67,33,0.45)');
+    stainGrad.addColorStop(1, 'rgba(101,67,33,0)');
+    c.fillStyle = stainGrad;
+    c.beginPath(); c.arc(70, 410, 14, 0, Math.PI*2); c.fill();
+  }
+
+  function drawSpace(c) {
+    c.fillStyle = '#04081f';
+    c.fillRect(0, 0, COLS*SIZE, ROWS*SIZE);
+    // Nebula patches
+    const nebs = [
+      { x: 70,  y: 100, r: 100, color: 'rgba(168,85,247,0.18)' },
+      { x: 220, y: 280, r: 120, color: 'rgba(34,211,238,0.15)' },
+      { x: 140, y: 480, r: 90,  color: 'rgba(232,121,249,0.13)' },
+    ];
+    nebs.forEach(n => {
+      const g = c.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      g.addColorStop(0, n.color);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g;
+      c.fillRect(0, 0, COLS*SIZE, ROWS*SIZE);
+    });
+    // Stars (deterministic)
+    for (let i = 0; i < 90; i++) {
+      const x = (i * 47) % (COLS * SIZE);
+      const y = (i * 89) % (ROWS * SIZE);
+      const big = (i * 7) % 11 === 0;
+      c.fillStyle = big ? '#fde047' : 'rgba(255,255,255,0.9)';
+      c.beginPath();
+      c.arc(x, y, big ? 1.8 : 0.7, 0, Math.PI*2);
+      c.fill();
+    }
+    // Twinkly highlight stars
+    c.fillStyle = '#fff';
+    [[60, 80], [230, 220], [110, 470], [40, 540]].forEach(([x, y]) => {
+      c.beginPath(); c.arc(x, y, 2.5, 0, Math.PI*2); c.fill();
+      // Cross sparkle
+      c.strokeStyle = 'rgba(255,255,255,0.5)'; c.lineWidth = 0.8;
+      c.beginPath(); c.moveTo(x-5, y); c.lineTo(x+5, y);
+      c.moveTo(x, y-5); c.lineTo(x, y+5); c.stroke();
+    });
+  }
+
+  function drawCircuit(c) {
+    // Dark base
+    c.fillStyle = '#070d1f';
+    c.fillRect(0, 0, COLS*SIZE, ROWS*SIZE);
+    // Faint grid
+    c.strokeStyle = 'rgba(0,180,255,0.08)';
+    c.lineWidth = 0.5;
+    for (let i = 0; i <= COLS; i++) {
+      c.beginPath(); c.moveTo(i*SIZE, 0); c.lineTo(i*SIZE, ROWS*SIZE); c.stroke();
+    }
+    for (let j = 0; j <= ROWS; j++) {
+      c.beginPath(); c.moveTo(0, j*SIZE); c.lineTo(COLS*SIZE, j*SIZE); c.stroke();
+    }
+    // Circuit traces
+    c.strokeStyle = 'rgba(34,211,238,0.45)';
+    c.lineWidth = 1.5;
+    const traces = [
+      [[0, 60],   [120, 60],  [120, 180], [240, 180]],
+      [[0, 220],  [60, 220],  [60, 340],  [180, 340]],
+      [[60, 380], [60, 460],  [240, 460], [240, 540]],
+      [[300, 80], [240, 80],  [240, 140], [180, 140]],
+      [[300, 360],[180, 360], [180, 420], [120, 420]],
+    ];
+    traces.forEach(path => {
+      c.beginPath();
+      path.forEach(([x, y], i) => i === 0 ? c.moveTo(x, y) : c.lineTo(x, y));
+      c.stroke();
+    });
+    // Glowing nodes (orange = HCP brand)
+    const nodes = [
+      [120, 60], [120, 180], [240, 180],
+      [60, 220], [60, 340],
+      [240, 460],
+      [240, 80], [240, 140],
+      [180, 360], [180, 420],
+    ];
+    nodes.forEach(([x, y]) => {
+      const g = c.createRadialGradient(x, y, 0, x, y, 8);
+      g.addColorStop(0, 'rgba(255,140,0,0.9)');
+      g.addColorStop(1, 'rgba(255,140,0,0)');
+      c.fillStyle = g;
+      c.beginPath(); c.arc(x, y, 8, 0, Math.PI*2); c.fill();
+      c.fillStyle = '#ffd700';
+      c.beginPath(); c.arc(x, y, 2.5, 0, Math.PI*2); c.fill();
+    });
+  }
+
   // ============ PIECE RENDERERS ============
   function drawPieceBlock(c, px, py, s, color) {
-    if (theme.pieceStyle === 'soccerball') return drawSoccerBall(c, px, py, s, color);
-    if (theme.pieceStyle === 'smiley')     return drawSmiley(c, px, py, s, color);
-    return drawBasketball(c, px, py, s, color);
+    switch (theme.pieceStyle) {
+      case 'soccerball': return drawSoccerBall(c, px, py, s, color);
+      case 'smiley':     return drawSmiley(c, px, py, s, color);
+      case 'puck':       return drawPuck(c, px, py, s, color);
+      case 'baseball':   return drawBaseball(c, px, py, s, color);
+      case 'sticky':     return drawSticky(c, px, py, s, color);
+      case 'orb':        return drawOrb(c, px, py, s, color);
+      case 'datacube':   return drawDataCube(c, px, py, s, color);
+      default:           return drawBasketball(c, px, py, s, color);
+    }
   }
 
   function drawBasketball(c, px, py, s, color) {
@@ -913,6 +1349,153 @@
     // Highlight
     c.beginPath(); c.arc(cx - r*0.3, cy - r*0.5, r*0.15, 0, Math.PI*2);
     c.fillStyle = 'rgba(255,255,255,0.5)'; c.fill();
+  }
+
+  function drawPuck(c, px, py, s, color) {
+    const r = s / 2;
+    const cx = px + r, cy = py + r;
+    // Shadow under puck
+    c.fillStyle = 'rgba(0,0,0,0.45)';
+    c.beginPath(); c.ellipse(cx, cy + 2, r - 1, r * 0.85, 0, 0, Math.PI*2); c.fill();
+    // Puck body
+    const g = c.createRadialGradient(cx - r*0.3, cy - r*0.3, 0, cx, cy, r);
+    g.addColorStop(0, '#3a3a3a');
+    g.addColorStop(1, '#0c0c0c');
+    c.fillStyle = g;
+    c.beginPath(); c.ellipse(cx, cy, r - 2, r * 0.82, 0, 0, Math.PI*2); c.fill();
+    // Edge highlight (top rim)
+    c.strokeStyle = 'rgba(255,255,255,0.2)'; c.lineWidth = 0.8;
+    c.beginPath(); c.ellipse(cx, cy - 1, r - 2.5, r * 0.78, 0, Math.PI, 0); c.stroke();
+    // Colored team ring
+    c.strokeStyle = color; c.lineWidth = 2;
+    c.beginPath(); c.ellipse(cx, cy, r - 4.5, r * 0.6, 0, 0, Math.PI*2); c.stroke();
+    // Center dot
+    c.fillStyle = color;
+    c.beginPath(); c.arc(cx, cy, 1.6, 0, Math.PI*2); c.fill();
+    // Top sheen
+    c.fillStyle = 'rgba(255,255,255,0.3)';
+    c.beginPath(); c.ellipse(cx - r*0.25, cy - r*0.35, r*0.3, r*0.12, 0, 0, Math.PI*2); c.fill();
+  }
+
+  function drawBaseball(c, px, py, s, color) {
+    const r = s / 2;
+    const cx = px + r, cy = py + r;
+    // White ball
+    const g = c.createRadialGradient(cx - r*0.4, cy - r*0.4, r*0.1, cx, cy, r);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.7, '#f1eee4');
+    g.addColorStop(1, '#c8c4b6');
+    c.beginPath(); c.arc(cx, cy, r - 1.2, 0, Math.PI*2); c.fillStyle = g; c.fill();
+    c.strokeStyle = 'rgba(0,0,0,0.5)'; c.lineWidth = 0.8;
+    c.beginPath(); c.arc(cx, cy, r - 1.2, 0, Math.PI*2); c.stroke();
+    // Red stitching arcs (piece color tinted)
+    const stitchColor = darken(color, 0.1);
+    c.strokeStyle = stitchColor; c.lineWidth = 1.4;
+    c.beginPath(); c.arc(cx, cy, r - 3.5, Math.PI * 0.18, Math.PI * 0.82); c.stroke();
+    c.beginPath(); c.arc(cx, cy, r - 3.5, Math.PI * 1.18, Math.PI * 1.82); c.stroke();
+    // Stitch ticks
+    c.lineWidth = 0.9;
+    for (let i = 0; i < 5; i++) {
+      const t = i / 4;
+      const a1 = Math.PI * (0.22 + t * 0.56);
+      const a2 = Math.PI * (1.22 + t * 0.56);
+      [a1, a2].forEach(a => {
+        const r1 = r - 4.8, r2 = r - 2.5;
+        c.beginPath();
+        c.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+        c.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+        c.stroke();
+      });
+    }
+    // Highlight
+    c.fillStyle = 'rgba(255,255,255,0.55)';
+    c.beginPath(); c.arc(cx - r*0.35, cy - r*0.35, r*0.18, 0, Math.PI*2); c.fill();
+  }
+
+  function drawSticky(c, px, py, s, color) {
+    // Slight shadow
+    c.fillStyle = 'rgba(0,0,0,0.35)';
+    c.fillRect(px + 2, py + 2, s - 2, s - 2);
+    // Sticky note body
+    const g = c.createLinearGradient(px, py, px + s, py + s);
+    g.addColorStop(0, lighten(color, 0.3));
+    g.addColorStop(1, color);
+    c.fillStyle = g;
+    c.fillRect(px + 1, py + 1, s - 3, s - 3);
+    // Folded corner top-right
+    c.fillStyle = darken(color, 0.25);
+    c.beginPath();
+    c.moveTo(px + s - 7, py + 1);
+    c.lineTo(px + s - 2, py + 1);
+    c.lineTo(px + s - 2, py + 6);
+    c.closePath(); c.fill();
+    // Pencil lines
+    c.strokeStyle = 'rgba(0,0,0,0.35)'; c.lineWidth = 0.6;
+    for (let i = 1; i <= 3; i++) {
+      const ly = py + i * (s/4);
+      c.beginPath();
+      c.moveTo(px + 4, ly);
+      c.lineTo(px + s - (i === 1 ? 9 : 5), ly);
+      c.stroke();
+    }
+    // Border
+    c.strokeStyle = darken(color, 0.35); c.lineWidth = 0.8;
+    c.strokeRect(px + 1, py + 1, s - 3, s - 3);
+  }
+
+  function drawOrb(c, px, py, s, color) {
+    const r = s / 2;
+    const cx = px + r, cy = py + r;
+    // Outer halo
+    const halo = c.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 1.05);
+    halo.addColorStop(0, color);
+    halo.addColorStop(0.5, lighten(color, 0.2));
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = halo;
+    c.beginPath(); c.arc(cx, cy, r * 1.05, 0, Math.PI*2); c.fill();
+    // Core
+    const core = c.createRadialGradient(cx - r*0.4, cy - r*0.4, 0, cx, cy, r - 2);
+    core.addColorStop(0, '#ffffff');
+    core.addColorStop(0.35, lighten(color, 0.3));
+    core.addColorStop(1, color);
+    c.fillStyle = core;
+    c.beginPath(); c.arc(cx, cy, r - 2, 0, Math.PI*2); c.fill();
+    // Bright highlight
+    c.fillStyle = 'rgba(255,255,255,0.65)';
+    c.beginPath(); c.arc(cx - r*0.3, cy - r*0.3, r*0.22, 0, Math.PI*2); c.fill();
+    // Subtle ring
+    c.strokeStyle = lighten(color, 0.5); c.lineWidth = 0.8;
+    c.beginPath(); c.arc(cx, cy, r - 1.5, 0, Math.PI*2); c.stroke();
+  }
+
+  function drawDataCube(c, px, py, s, color) {
+    // Tile base
+    c.fillStyle = '#020617';
+    c.fillRect(px, py, s, s);
+    // Cube face with gradient
+    const g = c.createLinearGradient(px, py, px + s, py + s);
+    g.addColorStop(0, lighten(color, 0.45));
+    g.addColorStop(0.5, color);
+    g.addColorStop(1, darken(color, 0.45));
+    c.fillStyle = g;
+    c.fillRect(px + 2.5, py + 2.5, s - 5, s - 5);
+    // Inner grid pattern (3x3)
+    c.strokeStyle = 'rgba(255,255,255,0.22)'; c.lineWidth = 0.5;
+    for (let i = 1; i < 3; i++) {
+      const f = i / 3;
+      c.beginPath();
+      c.moveTo(px + 2.5 + f * (s - 5), py + 2.5);
+      c.lineTo(px + 2.5 + f * (s - 5), py + s - 2.5);
+      c.moveTo(px + 2.5, py + 2.5 + f * (s - 5));
+      c.lineTo(px + s - 2.5, py + 2.5 + f * (s - 5));
+      c.stroke();
+    }
+    // Neon border
+    c.strokeStyle = lighten(color, 0.5); c.lineWidth = 1.4;
+    c.strokeRect(px + 2.5, py + 2.5, s - 5, s - 5);
+    // Corner dot (LED)
+    c.fillStyle = '#ffd700';
+    c.beginPath(); c.arc(px + 5, py + 5, 1.2, 0, Math.PI*2); c.fill();
   }
 
   function drawGhost(p) {
