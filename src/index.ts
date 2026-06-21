@@ -1,5 +1,6 @@
 import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { extractText, getDocumentProxy } from "unpdf";
 import { z } from "zod";
 
 interface Env {
@@ -52,6 +53,30 @@ function makeCall(apiKey: string): CallFn {
   };
 }
 
+async function downloadAttachmentBytes(
+  apiKey: string,
+  attachmentId: number,
+): Promise<{ bytes: Uint8Array; contentType: string | null }> {
+  const resp = await fetch(`${BASE_URL}/attachments/${attachmentId}/download`, {
+    headers: { Authorization: `Token ${apiKey}` },
+    redirect: "follow",
+  });
+  if (!resp.ok) {
+    throw new Error(`CATS attachment ${attachmentId}: ${resp.status} ${resp.statusText}`);
+  }
+  const buf = await resp.arrayBuffer();
+  return {
+    bytes: new Uint8Array(buf),
+    contentType: resp.headers.get("content-type"),
+  };
+}
+
+async function extractPdfText(bytes: Uint8Array): Promise<{ pages: number; text: string }> {
+  const pdf = await getDocumentProxy(bytes);
+  const { totalPages, text } = await extractText(pdf, { mergePages: true });
+  return { pages: totalPages, text };
+}
+
 function ok(data: unknown) {
   return {
     content: [
@@ -78,7 +103,8 @@ export class CatsMcp extends McpAgent<Env> {
   });
 
   async init() {
-    const call = makeCall(this.env.CATS_API_KEY);
+    const apiKey = this.env.CATS_API_KEY;
+    const call = makeCall(apiKey);
     const s = this.server;
 
     // ------------------------------------------------------------------
@@ -86,24 +112,19 @@ export class CatsMcp extends McpAgent<Env> {
     // ------------------------------------------------------------------
     s.tool(
       "search_candidates",
-      "Search or list candidates. All filters are optional; combine freely.",
+      "Full-text search across candidate records AND the indexed text of their " +
+        "resume attachments. This is what to use for content questions like " +
+        "schools, degrees, employer names, or skills that may only appear in the " +
+        "resume PDF. The query supports quoted phrases and boolean operators " +
+        "(AND, OR, NOT, parentheses) — e.g. `\"Harvard\" AND \"Computer Science\" " +
+        "AND (\"Citadel\" OR \"Two Sigma\")`. Bare multi-word queries default to OR " +
+        "and will balloon the match count; quote phrases for precision.",
       {
         ...paging,
-        q: z.string().optional().describe("Full-text search query"),
-        email: z.string().optional(),
-        first_name: z.string().optional(),
-        last_name: z.string().optional(),
-        phone: z.string().optional(),
-        city: z.string().optional(),
-        state: z.string().optional(),
-        country: z.string().optional(),
-        title: z.string().optional(),
-        current_employer: z.string().optional(),
-        is_hot: z.boolean().optional(),
-        date_created_min: z.string().optional().describe("ISO date lower bound"),
-        date_created_max: z.string().optional().describe("ISO date upper bound"),
+        query: z.string().describe("Full-text query with optional AND/OR/NOT and quoted phrases"),
       },
-      async (args) => ok(await call("GET", "/candidates", args)),
+      async ({ query, ...q }) =>
+        ok(await call("GET", "/candidates/search", { ...q, query })),
     );
 
     s.tool(
@@ -274,6 +295,101 @@ export class CatsMcp extends McpAgent<Env> {
       "List parsed skills on a candidate.",
       { id: z.number().int() },
       async ({ id }) => ok(await call("GET", `/candidates/${id}/skills`)),
+    );
+
+    s.tool(
+      "get_resume_text",
+      "Extract text from a candidate's resume PDF. Picks the first attachment " +
+        "marked is_resume=true (or the first PDF attachment if none are flagged). " +
+        "Use this to verify details that only appear in the resume — school, " +
+        "degree, graduation year, education dates, certifications. PDF only.",
+      {
+        candidate_id: z.number().int(),
+        max_chars: z
+          .number()
+          .int()
+          .positive()
+          .max(200000)
+          .optional()
+          .describe("Truncate returned text to this many characters (default 30000)"),
+      },
+      async ({ candidate_id, max_chars }) => {
+        const list = (await call("GET", `/candidates/${candidate_id}/attachments`)) as {
+          _embedded?: { attachments?: Array<{ id: number; filename: string; is_resume?: boolean }> };
+        };
+        const items = list?._embedded?.attachments ?? [];
+        if (items.length === 0) {
+          return ok({ candidate_id, message: "No attachments on this candidate." });
+        }
+        const isPdf = (f: string) => f.toLowerCase().endsWith(".pdf");
+        const pick =
+          items.find((a) => a.is_resume && isPdf(a.filename)) ??
+          items.find((a) => a.is_resume) ??
+          items.find((a) => isPdf(a.filename)) ??
+          items[0];
+        if (!isPdf(pick.filename)) {
+          return ok({
+            candidate_id,
+            attachment_id: pick.id,
+            filename: pick.filename,
+            error: "Selected attachment is not a PDF. Use get_attachment_text with a PDF attachment_id.",
+          });
+        }
+        const { bytes } = await downloadAttachmentBytes(apiKey, pick.id);
+        const { pages, text } = await extractPdfText(bytes);
+        const limit = max_chars ?? 30000;
+        const truncated = text.length > limit;
+        return ok({
+          candidate_id,
+          attachment_id: pick.id,
+          filename: pick.filename,
+          pages,
+          char_count: text.length,
+          truncated,
+          text: truncated ? text.slice(0, limit) : text,
+        });
+      },
+    );
+
+    s.tool(
+      "get_attachment_text",
+      "Extract text from a specific PDF attachment by ID (works for any attachment, " +
+        "not just resumes). Use list_candidate_attachments to find IDs.",
+      {
+        attachment_id: z.number().int(),
+        max_chars: z
+          .number()
+          .int()
+          .positive()
+          .max(200000)
+          .optional()
+          .describe("Truncate returned text to this many characters (default 30000)"),
+      },
+      async ({ attachment_id, max_chars }) => {
+        const { bytes, contentType } = await downloadAttachmentBytes(
+          this.env.CATS_API_KEY,
+          attachment_id,
+        );
+        const looksLikePdf = bytes.length > 4 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46;
+        if (!looksLikePdf) {
+          return ok({
+            attachment_id,
+            content_type: contentType,
+            byte_count: bytes.length,
+            error: "Attachment is not a PDF — text extraction supports PDFs only.",
+          });
+        }
+        const { pages, text } = await extractPdfText(bytes);
+        const limit = max_chars ?? 30000;
+        const truncated = text.length > limit;
+        return ok({
+          attachment_id,
+          pages,
+          char_count: text.length,
+          truncated,
+          text: truncated ? text.slice(0, limit) : text,
+        });
+      },
     );
 
     // ------------------------------------------------------------------

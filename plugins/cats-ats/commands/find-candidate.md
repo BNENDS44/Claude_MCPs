@@ -7,7 +7,14 @@ You are helping a recruiter find a candidate in CATS ATS.
 
 The user's query is: **$ARGUMENTS**
 
-Use the `search_candidates` tool from the `cats-ats` MCP server to find matching candidates. Decide the best search parameters based on what they gave you (name, skill, job title, location, email, etc.) — don't ask for clarification unless the query is truly ambiguous.
+Use the `search_candidates` tool from the `cats-ats` MCP server. It runs a full-text query across candidate records and the indexed text of their resume PDFs, so it handles every kind of lookup — name, email, phone, school, employer, skill.
+
+Two practical rules for the query string:
+
+- **Quote multi-word values** (`"Jane Doe"`, `"foo@bar.com"`, `"Goldman Sachs"`). Bare multi-word queries default to OR and over-match.
+- **Use AND to combine criteria** (`"Jane Doe" AND "Chicago"`). Use OR inside a parenthesized synonym group (`("Goldman" OR "Morgan Stanley")`).
+
+Don't ask for clarification unless the query is truly ambiguous.
 
 When you have results, show a short table with:
 

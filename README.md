@@ -103,9 +103,9 @@ Go to **Settings → Connectors → Add custom connector** and enter the same
 ### Claude Code (CLI) — easiest: install the plugin
 
 This repo also ships a Claude Code **plugin** that bundles the MCP connection,
-slash commands (`/cats-find-candidate`, `/cats-pipeline`, `/cats-daily-summary`,
-`/cats-add-note`, `/cats-new-candidate`), a recruiter subagent, and a
-candidate-intake skill. Each teammate runs this once:
+slash commands (`/cats-search`, `/cats-find-candidate`, `/cats-pipeline`,
+`/cats-daily-summary`, `/cats-add-note`, `/cats-new-candidate`), a recruiter
+subagent, and `candidate-intake` + `candidate-search` skills. Each teammate runs this once:
 
 ```bash
 # 1. Tell Claude where your Worker lives and give it the shared token.
@@ -162,7 +162,7 @@ automatically):
 
 | Area | Tools |
 |---|---|
-| **Candidates** | `search_candidates`, `get_candidate`, `create_candidate`, `update_candidate`, `delete_candidate`, `list_candidate_jobs`, `list_candidate_activities`, `add_candidate_activity`, `list_candidate_notes`, `add_candidate_note`, `list_candidate_tags`, `add_candidate_tags`, `remove_candidate_tag`, `list_candidate_attachments`, `list_candidate_emails`, `list_candidate_skills` |
+| **Candidates** | `search_candidates` (full-text over resume PDFs; supports `AND`/`OR`/`NOT` and quoted phrases), `get_candidate`, `create_candidate`, `update_candidate`, `delete_candidate`, `list_candidate_jobs`, `list_candidate_activities`, `add_candidate_activity`, `list_candidate_notes`, `add_candidate_note`, `list_candidate_tags`, `add_candidate_tags`, `remove_candidate_tag`, `list_candidate_attachments`, `get_resume_text`, `get_attachment_text`, `list_candidate_emails`, `list_candidate_skills` |
 | **Jobs** | `list_jobs`, `get_job`, `create_job`, `update_job`, `delete_job`, `list_job_candidates`, `attach_candidate_to_job`, `detach_candidate_from_job`, `list_job_notes`, `add_job_note`, `list_job_activities` |
 | **Companies** | `list_companies`, `get_company`, `create_company`, `update_company`, `delete_company`, `list_company_contacts`, `list_company_jobs`, `list_company_notes`, `add_company_note` |
 | **Contacts** | `list_contacts`, `get_contact`, `create_contact`, `update_contact`, `delete_contact` |
