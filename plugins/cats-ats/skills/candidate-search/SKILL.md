@@ -72,22 +72,53 @@ When parsing the returned text:
 
 If `get_resume_text` returns `"No attachments on this candidate"` or a non-PDF, mark education as **unverified** and surface that candidate separately rather than dropping them silently.
 
-## Step 5 — Rank and report
+## Step 5 — Score, rank, and report
 
-Score each candidate on hard criteria first, then soft. For each one, record:
+For each surviving candidate, record evidence per criterion:
 
-- ✅ **Confirmed** — criterion verified by structured field or resume text.
+- ✅ **Confirmed** — verified by structured field or resume text.
 - ≈ **Inferred** — strong signal but indirect (e.g. tenure at a company *named like* a hedge fund, but no explicit "hedge fund" in their record).
 - ❌ **Failed** — drop.
 - ❓ **Unknown** — missing data; do not drop.
 
-Output one markdown table, top 10:
+Then assign each candidate a single **score from 1 to 10**. Use this rubric — start at 5 and adjust, then cap at 10 / floor at 1, rounded to a whole number:
 
-| # | Candidate (ID) | Location | Current role | Hard criteria met | Notes |
+**Query match** (dominant factor):
+- `+3` All hard criteria ✅ confirmed
+- `+2` All hard criteria met, ≥1 inferred
+- `−2` One hard criterion ❌ failed (but still worth surfacing)
+- `−4` Multiple hard criteria failed
+
+**Soft criteria** (employer prestige, role-seniority fit, recency since graduation, etc.):
+- `+1` Meets most soft criteria
+- `−1` Misses most soft criteria
+
+**Candidate quality** (independent of this query):
+- `+1` Complete profile (resume on file, parsed work history, recent CATS activity)
+- `+1` Positive recruiter sentiment in `activities`/notes ("strong", "great background", advanced in a pipeline)
+- `−1` Sparse profile (no resume, no work history, no notes)
+- `−1` Negative recruiter sentiment ("not interested", "moved on", "not a fit", "withdrew")
+
+**Score interpretation** (include this legend in the output so recruiters know how to act):
+
+- **9–10** Strong match. All criteria confirmed. Reach out today.
+- **7–8** Solid match. One small gap or some inferred evidence. Worth a conversation.
+- **5–6** Borderline. Investigate the gaps before reaching out.
+- **3–4** Weak match. Significant criteria failed; surface only if list is thin.
+- **1–2** Probably wrong fit. Include only when the recruiter explicitly wants the long tail.
+
+### Output format
+
+Sort by score descending. Show the top 10 in a markdown table:
+
+| Score | Candidate (ID) | Location | Current role | Criteria | Why this score |
+|---|---|---|---|---|---|
+| 9 | Jane Doe (402…) | New York, NY | Quant Researcher @ Two Sigma | School ✅ · Degree ✅ · Fund tenure 4.2y ✅ · Tri-state ✅ | Harvard CS 2021 confirmed in resume; 4 yrs at Two Sigma per work_history; recruiter notes "strong technical" |
 
 Below the table, two short sections:
-- **Strong-but-incomplete** — promising candidates missing a resume or with `❓` on a hard criterion. List with what's missing.
-- **Rejected at verification** — anyone who matched the keyword search but failed a hard check (location, tenure, false-positive school mention). One line each, with the reason. This is valuable: it tells the recruiter why someone they expected to see isn't on the list.
+
+- **Strong-but-incomplete** — promising candidates with ❓ on a hard criterion (often "no resume on file"). List with what's missing so the recruiter can choose to investigate manually. Score these but flag the gap.
+- **Rejected at verification** — anyone who matched the keyword search but failed a hard check. One line each, with the reason (location, tenure, false-positive school mention). This tells the recruiter why someone they expected to see isn't on the list.
 
 ## Anti-patterns to avoid
 
