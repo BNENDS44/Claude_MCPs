@@ -7,10 +7,12 @@ You are helping a recruiter find a candidate in CATS ATS.
 
 The user's query is: **$ARGUMENTS**
 
-Pick the right tool from the `cats-ats` MCP server:
+Use the `search_candidates` tool from the `cats-ats` MCP server. It runs a full-text query across candidate records and the indexed text of their resume PDFs, so it handles every kind of lookup — name, email, phone, school, employer, skill.
 
-- For name / email / phone / exact city or state / current employer lookups, use `list_candidates` with the relevant field.
-- For skill, title, school, prior-employer, or any keyword that may live in resume text, use `search_candidates` with a quoted boolean query (e.g. `"Python" AND "Goldman"`). Bare multi-word queries default to OR and will over-match.
+Two practical rules for the query string:
+
+- **Quote multi-word values** (`"Jane Doe"`, `"foo@bar.com"`, `"Goldman Sachs"`). Bare multi-word queries default to OR and over-match.
+- **Use AND to combine criteria** (`"Jane Doe" AND "Chicago"`). Use OR inside a parenthesized synonym group (`("Goldman" OR "Morgan Stanley")`).
 
 Don't ask for clarification unless the query is truly ambiguous.
 

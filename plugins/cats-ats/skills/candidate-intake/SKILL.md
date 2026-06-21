@@ -26,9 +26,9 @@ Never invent fields. If something isn't in the source text, leave it out — don
 
 1. **Parse the input** into the fields above. Show the user a short summary of what you extracted before touching CATS.
 
-2. **Duplicate check.** In this order:
-   - If there's an email, call `search_candidates` with that email.
-   - Also call `search_candidates` with the full name.
+2. **Duplicate check.** `search_candidates` is full-text over resume PDFs, so quote multi-word values for precision:
+   - If there's an email, call `search_candidates` with `query: "\"foo@bar.com\""`.
+   - Also call `search_candidates` with `query: "\"First Last\""` for the full name.
    If any result looks like a likely match (same email, or same name + same company/location), stop and show it to the user. Ask whether to:
      - **update** the existing candidate with new info, or
      - **create** a new one anyway (true namesake), or

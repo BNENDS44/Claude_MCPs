@@ -128,29 +128,6 @@ export class CatsMcp extends McpAgent<Env> {
     );
 
     s.tool(
-      "list_candidates",
-      "List or filter candidates by exact structured fields (name, email, city, " +
-        "state, current_employer, etc.). Does NOT search resume text — use " +
-        "search_candidates for content/keyword queries.",
-      {
-        ...paging,
-        email: z.string().optional(),
-        first_name: z.string().optional(),
-        last_name: z.string().optional(),
-        phone: z.string().optional(),
-        city: z.string().optional(),
-        state: z.string().optional(),
-        country: z.string().optional(),
-        title: z.string().optional(),
-        current_employer: z.string().optional(),
-        is_hot: z.boolean().optional(),
-        date_created_min: z.string().optional().describe("ISO date lower bound"),
-        date_created_max: z.string().optional().describe("ISO date upper bound"),
-      },
-      async (args) => ok(await call("GET", "/candidates", args)),
-    );
-
-    s.tool(
       "get_candidate",
       "Get a single candidate by ID.",
       { id: z.number().int() },
