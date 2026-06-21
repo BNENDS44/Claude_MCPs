@@ -163,9 +163,9 @@ automatically):
 | Area | Tools |
 |---|---|
 | **Candidates** | `search_candidates` (full-text over resume PDFs; supports `AND`/`OR`/`NOT` and quoted phrases), `get_candidate`, `create_candidate`, `update_candidate`, `delete_candidate`, `list_candidate_jobs`, `list_candidate_activities`, `add_candidate_activity`, `list_candidate_notes`, `add_candidate_note`, `list_candidate_tags`, `add_candidate_tags`, `remove_candidate_tag`, `list_candidate_attachments`, `get_resume_text`, `get_attachment_text`, `list_candidate_emails`, `list_candidate_skills` |
-| **Jobs** | `list_jobs`, `get_job`, `create_job`, `update_job`, `delete_job`, `list_job_candidates`, `attach_candidate_to_job`, `detach_candidate_from_job`, `list_job_notes`, `add_job_note`, `list_job_activities` |
-| **Companies** | `list_companies`, `get_company`, `create_company`, `update_company`, `delete_company`, `list_company_contacts`, `list_company_jobs`, `list_company_notes`, `add_company_note` |
-| **Contacts** | `list_contacts`, `get_contact`, `create_contact`, `update_contact`, `delete_contact` |
+| **Jobs** | `search_jobs` (full-text; supports `AND`/`OR`/`NOT` and quoted phrases), `list_jobs`, `get_job`, `create_job`, `update_job`, `delete_job`, `list_job_candidates`, `attach_candidate_to_job`, `detach_candidate_from_job`, `list_job_notes`, `add_job_note`, `list_job_activities` |
+| **Companies** | `search_companies` (full-text; supports `AND`/`OR`/`NOT` and quoted phrases), `list_companies`, `get_company`, `create_company`, `update_company`, `delete_company`, `list_company_contacts`, `list_company_jobs`, `list_company_notes`, `add_company_note` |
+| **Contacts** | `search_contacts` (full-text; supports `AND`/`OR`/`NOT` and quoted phrases), `list_contacts`, `get_contact`, `create_contact`, `update_contact`, `delete_contact` |
 | **Lists** | `list_lists`, `get_list`, `create_list`, `delete_list`, `list_list_members`, `add_to_list`, `remove_from_list` |
 | **Pipelines** | `list_pipelines`, `get_pipeline` |
 | **Users** | `get_me`, `list_users`, `get_user` |

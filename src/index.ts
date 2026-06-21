@@ -397,21 +397,24 @@ export class CatsMcp extends McpAgent<Env> {
     // ------------------------------------------------------------------
     s.tool(
       "list_jobs",
-      "List or search jobs.",
+      "Paginated list of all jobs. For keyword/title/status/location filtering, " +
+        "use search_jobs (full-text). Field filters on this endpoint are silently " +
+        "ignored by CATS.",
+      { ...paging },
+      async (args) => ok(await call("GET", "/jobs", args)),
+    );
+
+    s.tool(
+      "search_jobs",
+      "Full-text search across job records (title, description, status, location). " +
+        "Supports quoted phrases and boolean operators (AND, OR, NOT). " +
+        "Bare multi-word queries default to OR; quote phrases for precision.",
       {
         ...paging,
-        q: z.string().optional(),
-        title: z.string().optional(),
-        status: z.string().optional().describe("e.g. 'Active', 'On Hold', 'Closed'"),
-        company_id: z.number().int().optional(),
-        contact_id: z.number().int().optional(),
-        owner_id: z.number().int().optional(),
-        city: z.string().optional(),
-        state: z.string().optional(),
-        country: z.string().optional(),
-        is_hot: z.boolean().optional(),
+        query: z.string().describe("Full-text query with optional AND/OR/NOT and quoted phrases"),
       },
-      async (args) => ok(await call("GET", "/jobs", args)),
+      async ({ query, ...q }) =>
+        ok(await call("GET", "/jobs/search", { ...q, query })),
     );
 
     s.tool(
@@ -533,17 +536,24 @@ export class CatsMcp extends McpAgent<Env> {
     // ------------------------------------------------------------------
     s.tool(
       "list_companies",
-      "List or search companies.",
+      "Paginated list of all companies. For name/keyword/location filtering, " +
+        "use search_companies (full-text). Field filters on this endpoint are " +
+        "silently ignored by CATS.",
+      { ...paging },
+      async (args) => ok(await call("GET", "/companies", args)),
+    );
+
+    s.tool(
+      "search_companies",
+      "Full-text search across company records (name, website, industry, " +
+        "address). Supports quoted phrases and boolean operators (AND, OR, NOT). " +
+        "Bare multi-word queries default to OR; quote phrases for precision.",
       {
         ...paging,
-        q: z.string().optional(),
-        name: z.string().optional(),
-        city: z.string().optional(),
-        state: z.string().optional(),
-        country: z.string().optional(),
-        owner_id: z.number().int().optional(),
+        query: z.string().describe("Full-text query with optional AND/OR/NOT and quoted phrases"),
       },
-      async (args) => ok(await call("GET", "/companies", args)),
+      async ({ query, ...q }) =>
+        ok(await call("GET", "/companies/search", { ...q, query })),
     );
 
     s.tool(
@@ -623,17 +633,24 @@ export class CatsMcp extends McpAgent<Env> {
     // ------------------------------------------------------------------
     s.tool(
       "list_contacts",
-      "List or search contacts (people at companies).",
+      "Paginated list of all contacts (people at companies). For name/email/" +
+        "company filtering, use search_contacts (full-text). Field filters on " +
+        "this endpoint are silently ignored by CATS.",
+      { ...paging },
+      async (args) => ok(await call("GET", "/contacts", args)),
+    );
+
+    s.tool(
+      "search_contacts",
+      "Full-text search across contact records (name, email, title, company, " +
+        "notes). Supports quoted phrases and boolean operators (AND, OR, NOT). " +
+        "Bare multi-word queries default to OR; quote phrases for precision.",
       {
         ...paging,
-        q: z.string().optional(),
-        email: z.string().optional(),
-        first_name: z.string().optional(),
-        last_name: z.string().optional(),
-        company_id: z.number().int().optional(),
-        owner_id: z.number().int().optional(),
+        query: z.string().describe("Full-text query with optional AND/OR/NOT and quoted phrases"),
       },
-      async (args) => ok(await call("GET", "/contacts", args)),
+      async ({ query, ...q }) =>
+        ok(await call("GET", "/contacts/search", { ...q, query })),
     );
 
     s.tool(
