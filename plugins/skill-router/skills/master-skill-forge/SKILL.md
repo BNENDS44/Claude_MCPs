@@ -1,6 +1,7 @@
 ---
 name: master-skill-forge
-description: The builder that turns a skill design into real, working skill files. Use when you have a skill spec (usually from super-skill-architect) or a clear request to create a skill, and need to scaffold the directory, write the SKILL.md with a strong triggering description, add any scripts/references/assets, validate the structure, and place it in the right location (project, plugin, or personal). Also use for "create a skill", "build this skill", "forge a skill", "scaffold a SKILL.md", or "turn this workflow into a skill". For rigorous evaluation and description optimization, it hands off to the skill-creator. Invoke whenever a skill needs to actually be built and installed, not just designed.
+description: |-
+  Use this skill whenever someone wants to turn a repeatable task, process, or set of commands into a reusable Claude skill — and then actually build it on disk. Trigger on natural phrasings like "make a skill out of this," "build me a skill that knows how to <do our X>," "turn this workflow into a skill," "I keep walking Claude through these same steps," or "I run these exact commands every time and want to stop pasting them." Also fires on "create/forge/scaffold a skill" or building from a spec (often from super-skill-architect). The job: capture the user's described steps, scaffold the directory, write SKILL.md with a strong triggering description, add any scripts/references/assets, validate, and place it (project, plugin, or personal). Do NOT use for ordinary coding tasks that merely start with "create" or "build" — a React component, CLI tool, GitHub Action, MCP server, or DB migration is not a skill. The output must be an installed Claude skill.
 ---
 
 # Master Skill Forge

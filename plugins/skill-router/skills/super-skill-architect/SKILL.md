@@ -1,6 +1,7 @@
 ---
 name: super-skill-architect
-description: The design layer for new skills. Use when a capability gap has been identified (often by skill-router) and you need to decide whether it warrants a skill at all, and if so, design its spec — scope, boundaries, trigger surface (the description), structure (single skill vs. split, what scripts/references/assets it needs), and success criteria — BEFORE any files are written. Also use when the user says "design a skill for…", "should this be a skill?", "plan out a skill", or wants to architect a capability without yet building it. Produces a skill spec that master-skill-forge then builds. Invoke before forging anything non-trivial so the build starts from a clear, deliberate design rather than a guess.
+description: |-
+  Use when deciding whether a desired capability should become a skill — or something else — and designing it before any files exist. Trigger when a user wants Claude to reliably handle a recurring task and asks whether to package it as a skill, slash command, subagent, or MCP tool ("should this be a skill or a slash command?", "is this worth making into a skill?", "what's the right way to wrap our deploy sequence?"). Trigger when they say "design a skill for…", "plan out a skill", "spec a skill before we build it", or want a capability scoped, bounded, and structured up front. This is the design/decision layer: it weighs alternatives, recommends the right container (and may conclude no skill is needed), and produces a spec — scope, trigger description, structure, success criteria — for master-skill-forge to build. Do NOT use for unrelated planning, API/architecture design, or actually writing the skill's files.
 ---
 
 # Super Skill Architect

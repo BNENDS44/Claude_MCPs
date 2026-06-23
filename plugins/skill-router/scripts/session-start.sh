@@ -15,6 +15,27 @@ HOME_DIR="${HOME:-/root}"
 
 emit() { printf '%s\n' "$1"; }
 
+# Extract "name<TAB>description" from a SKILL.md, handling both inline
+# (description: text) and YAML block-scalar (description: |- / > on the next
+# indented lines) frontmatter. Outputs the description folded to one line.
+SR_AWK='
+BEGIN{ name=""; desc=""; infm=0; dash=0; inblock=0 }
+{
+  if($0=="---"){ dash++; if(dash==1){infm=1}else{infm=0}; inblock=0; next }
+  if(!infm) next
+  if(inblock){
+    if($0 ~ /^[[:space:]]+/){ s=$0; sub(/^[[:space:]]+/,"",s); desc=(desc==""?s:desc" " s); next }
+    else { inblock=0 }
+  }
+  if($0 ~ /^name:/ && name==""){ s=$0; sub(/^name:[[:space:]]*/,"",s); name=s; next }
+  if($0 ~ /^description:/ && desc==""){
+    s=$0; sub(/^description:[[:space:]]*/,"",s)
+    if(s=="|"||s=="|-"||s==">"||s==">-"||s=="|+"||s==">+"||s==""){ inblock=1 } else { desc=s }
+    next
+  }
+}
+END{ gsub(/\r/,"",name); gsub(/\r/,"",desc); printf "%s\t%s\n", name, substr(desc,1,400) }'
+
 emit "===== skill-router :: ACTIVE for this session ====="
 emit ""
 emit "For every NON-TRIVIAL task this session, silently run the ROUTE protocol"
@@ -44,10 +65,11 @@ while IFS= read -r f; do
   if grep -qxF "$f" "$seen_file" 2>/dev/null; then continue; fi
   printf '%s\n' "$f" >> "$seen_file"
 
-  name="$(sed -n 's/^name:[[:space:]]*//p' "$f" 2>/dev/null | head -n1)"
-  desc="$(sed -n 's/^description:[[:space:]]*//p' "$f" 2>/dev/null | head -n1)"
+  meta="$(awk "$SR_AWK" "$f" 2>/dev/null)"
+  name="${meta%%$'\t'*}"
+  desc="${meta#*$'\t'}"
   [ -z "$name" ] && name="$(basename "$(dirname "$f")")"
-  desc="$(printf '%s' "$desc" | tr -d '\r' | cut -c1-240)"
+  desc="$(printf '%s' "$desc" | cut -c1-240)"
 
   emit "  • ${name} — ${desc}"
   count=$((count + 1))
