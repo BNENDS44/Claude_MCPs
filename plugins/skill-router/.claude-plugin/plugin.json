@@ -1,0 +1,12 @@
+{
+  "name": "skill-router",
+  "version": "0.1.0",
+  "description": "The ultimate skill router — automatically launches the best available skills for every task and detects the skills Claude wishes it had. Bundles the skill-router brain plus the super-skill-architect and master-skill-forge meta-skills, wired to fire on every session and turn via hooks.",
+  "author": {
+    "name": "BNENDS44",
+    "url": "https://github.com/BNENDS44"
+  },
+  "homepage": "https://github.com/BNENDS44/Claude_MCPs",
+  "license": "MIT",
+  "keywords": ["skills", "router", "orchestration", "meta", "automation", "self-improving"]
+}

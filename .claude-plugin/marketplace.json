@@ -12,6 +12,14 @@
       "version": "0.1.0",
       "category": "recruiting",
       "tags": ["cats", "ats", "recruiting", "mcp"]
+    },
+    {
+      "name": "skill-router",
+      "source": "./plugins/skill-router",
+      "description": "The ultimate skill router — auto-launches the best available skills for every task and detects the skills Claude wishes it had. Bundles the skill-router brain plus super-skill-architect and master-skill-forge meta-skills, wired to fire automatically every session and turn via hooks.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "tags": ["skills", "router", "orchestration", "meta", "automation"]
     }
   ]
 }
