@@ -13,6 +13,11 @@ that lets Claude (Desktop, Code, or the web app) drive your
   custom fields, email templates, plus a generic `cats_request` escape hatch
   for anything exotic.
 
+> **Also in this repo — [`skill-router`](#8-bonus-the-skill-router-plugin):** a
+> Claude Code plugin that automatically launches the best skill for every task
+> (and flags the skills you wish you had), so nobody has to remember which one to
+> run. Jump to [section 8](#8-bonus-the-skill-router-plugin).
+
 ---
 
 ## 1. Deploy (pick one path)
@@ -201,3 +206,46 @@ Re-upload with `npx wrangler secret put CATS_API_KEY` and redeploy.
 
 **Logs** — `npm run tail` streams live Worker logs; the Cloudflare dashboard
 has a persistent log view under *Workers & Pages → cats-ats-mcp → Logs*.
+
+---
+
+## 8. Bonus: the `skill-router` plugin
+
+This marketplace also ships **`skill-router`** — a Claude Code plugin that makes
+Claude pick and launch the *best* skill for whatever you ask, so nobody has to
+remember which skill to run or even know one exists. When no skill fits, it
+notices the gap and can build one.
+
+**Install (Claude Code CLI):**
+```bash
+claude
+> /plugin marketplace add BNENDS44/Claude_MCPs   # if not already added
+> /plugin install skill-router@cats-ats
+```
+Approve the hooks when prompted, then start a fresh session.
+
+**How it behaves.** On any non-trivial task it silently runs a short **ROUTE**
+protocol — **R**ead the request, find the best **O**ption (skill / slash command /
+subagent / MCP tool), **U**se it instead of hand-rolling, **T**rack any capability
+gap, and **E**volve by forging the high-value gaps into new skills. Trivial
+one-liners are left alone, so it never becomes a tax on simple asks.
+
+**What's inside:**
+
+| Skill | Role |
+|---|---|
+| `skill-router` | The brain — routes every task to the best available skill/tool. |
+| `super-skill-architect` | Decides whether a gap deserves a skill, and designs the spec. |
+| `master-skill-forge` | Builds, validates, and installs new skills. |
+
+**Why it's automatic, not manual.** A `SessionStart` hook scans every skill
+location and injects a fresh capability catalog plus the routing directive each
+session; a lightweight `UserPromptSubmit` hook keeps it active every turn. That's
+what makes the right skill fire without anyone asking. Capability gaps accumulate
+in `.claude/skill-wishlist.md` so recurring needs surface for forging.
+
+If it ever feels chatty, delete the `UserPromptSubmit` block in
+[`plugins/skill-router/hooks/hooks.json`](plugins/skill-router/hooks/hooks.json) —
+the once-per-session priming still drives routing. Full details and the trigger
+descriptions (tuned with the skill-creator eval loop) live in
+[`plugins/skill-router/README.md`](plugins/skill-router/README.md).
