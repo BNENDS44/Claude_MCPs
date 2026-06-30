@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clock Tower Labs</title>
+<meta name="description" content="Clock Tower Labs, Inc. — Audit the past, monitor the present, optimize the future. Sign up to learn more about what we're building.">
+<meta property="og:title" content="Clock Tower Labs">
+<meta property="og:description" content="Audit the past · Monitor the present · Optimize the future. Sign up to learn more.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple:#7C4DFF;        /* brightened brand purple for dark mode */
+    --purple-deep:#4B22BC;   /* true logo purple */
+    --light:#E8EBFA;         /* dark-mode adaptation of the navy half */
+    --navy:#031030;          /* true logo navy */
+    --ink:#05081C;
+    --face:#F7F8FF;
+    --muted:#8A92C4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(120% 90% at 50% 38%, #11183f 0%, #0a0f2c 42%, #05081c 100%);
+    color:#fff;
+    font-family:"Space Grotesk",sans-serif;
+    overflow:auto;
+    display:grid;
+    place-items:center;
+    min-height:100dvh;
+  }
+
+  /* ambient texture */
+  .grid{
+    position:fixed; inset:-2px;
+    background-image:
+      linear-gradient(rgba(124,77,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,77,255,.06) 1px, transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(70% 60% at 50% 42%, #000 0%, transparent 75%);
+    animation:drift 24s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes drift{to{background-position:46px 46px}}
+  .vignette{position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(80% 70% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);}
+
+  .stage{
+    position:relative;
+    width:min(86vw,520px);
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;
+    padding:48px 0;
+  }
+
+  /* ---------- EMBLEM ---------- */
+  .emblem{width:min(64vw,340px);aspect-ratio:1;position:relative}
+  .bloom{
+    position:absolute;left:50%;top:55%;width:62%;aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(124,77,255,.55) 0%, rgba(124,77,255,0) 68%);
+    filter:blur(8px);
+    animation:bloom 3.4s ease-in-out infinite;
+  }
+  @keyframes bloom{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.92)}
+                   50%{opacity:.95;transform:translate(-50%,-50%) scale(1.06)}}
+
+  svg{width:100%;height:100%;display:block;overflow:visible}
+
+  /* hexagon draw-in */
+  .hex{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;
+       stroke-dasharray:1;stroke-dashoffset:1;
+       animation:draw 1.5s cubic-bezier(.7,0,.3,1) .15s forwards;}
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  /* tower rise */
+  .tower{opacity:0;transform:translateY(26px);
+         animation:rise .9s cubic-bezier(.2,.7,.2,1) .55s forwards;}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  /* clock hands sweep — accelerating time-lapse */
+  .hand-min{transform-box:view-box;transform-origin:220px 250px;
+            animation:spin 1.9s linear .9s infinite;}
+  .hand-hr {transform-box:view-box;transform-origin:220px 250px;
+            animation:spin 7.6s linear .9s infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* orbiting nodes */
+  .orbit{transform-box:view-box;transform-origin:220px 250px;}
+  .orbit-a{animation:spin 8s linear infinite}
+  .orbit-b{animation:spinR 12s linear infinite}
+  .ring-dash{transform-box:view-box;transform-origin:220px 250px;
+             animation:spin 26s linear infinite;opacity:.0;
+             animation:fadeIn .8s ease 1s forwards, spin 26s linear infinite;}
+  @keyframes spinR{to{transform:rotate(-360deg)}}
+  @keyframes fadeIn{to{opacity:1}}
+
+  .pulse-node{animation:nodepulse 1.9s ease-in-out infinite}
+  @keyframes nodepulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+  /* ---------- WORDMARK ---------- */
+  .wordmark{margin-top:6px;overflow:hidden}
+  .wordmark h1{
+    font-family:"Michroma",sans-serif;
+    font-size:clamp(20px,5.4vw,34px);
+    letter-spacing:.22em;
+    line-height:1;
+    background:linear-gradient(90deg,#fff 0%,#fff 50%,var(--purple) 50%,#b79bff 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    transform:translateY(110%);
+    animation:wmUp .8s cubic-bezier(.2,.7,.2,1) 1.35s forwards;
+  }
+  @keyframes wmUp{to{transform:translateY(0)}}
+  .sub{display:flex;align-items:center;gap:14px;justify-content:center;
+       margin-top:10px;opacity:0;animation:fadeIn .7s ease 1.7s forwards}
+  .sub .ln{height:2px;width:46px;background:linear-gradient(90deg,transparent,var(--purple))}
+  .sub .ln.r{background:linear-gradient(90deg,var(--purple),transparent)}
+  .sub span{font-family:"Michroma",sans-serif;font-size:clamp(11px,2.6vw,15px);
+            letter-spacing:.5em;color:#fff;padding-left:.5em}
+
+  /* cycling tagline */
+  .tag{height:18px;margin-top:20px;position:relative;width:100%;
+       opacity:0;animation:fadeIn .7s ease 2s forwards}
+  .tag b{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;
+         gap:.6em;font-family:"Space Grotesk";font-weight:500;
+         font-size:clamp(11px,2.7vw,13px);letter-spacing:.18em;text-transform:uppercase;
+         color:var(--muted);opacity:0;transition:opacity .5s}
+  .tag b.on{opacity:1}
+  .tag b em{color:var(--purple);font-style:normal;font-weight:600}
+
+  /* ---------- PROGRESS ---------- */
+  .loader{margin-top:26px;width:min(80vw,340px);opacity:0;
+          animation:fadeIn .6s ease 2.2s forwards}
+  .meta{display:flex;justify-content:space-between;align-items:baseline;
+        font-family:"Space Mono";font-size:11px;letter-spacing:.14em;
+        color:var(--muted);margin-bottom:9px;text-transform:uppercase}
+  .meta .pct{color:#fff}
+  .track{height:3px;border-radius:99px;background:rgba(124,77,255,.16);overflow:hidden;position:relative}
+  .bar{height:100%;width:0%;border-radius:99px;
+       background:linear-gradient(90deg,var(--purple-deep),var(--purple) 60%,#b79bff);
+       box-shadow:0 0 14px rgba(124,77,255,.7);transition:width .12s linear}
+  .track::after{content:"";position:absolute;inset:0;width:32%;border-radius:99px;
+       background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+       animation:shimmer 1.7s ease-in-out infinite;mix-blend-mode:screen}
+  @keyframes shimmer{0%{transform:translateX(-120%)}100%{transform:translateX(360%)}}
+
+  /* ---------- SIGN-UP CTA ---------- */
+  .cta{
+    margin-top:30px;width:min(86vw,430px);
+    opacity:0;transform:translateY(16px);pointer-events:none;
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .cta.show{opacity:1;transform:none;pointer-events:auto}
+  .cta h2{
+    font-family:"Michroma",sans-serif;font-weight:400;
+    font-size:clamp(13px,3.3vw,16px);letter-spacing:.14em;
+    color:#fff;margin-bottom:8px;
+  }
+  .cta .blurb{font-size:clamp(12px,2.8vw,13.5px);color:var(--muted);
+    line-height:1.55;margin-bottom:18px;}
+  form.signup{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .signup input[type=email]{
+    flex:1 1 210px;min-width:0;padding:13px 16px;border-radius:12px;
+    border:1px solid rgba(124,77,255,.35);background:rgba(124,77,255,.08);
+    color:#fff;font-family:"Space Grotesk";font-size:14px;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .signup input[type=email]::placeholder{color:#6f78a8}
+  .signup input[type=email]:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,77,255,.18)}
+  .signup button{
+    padding:13px 24px;border:0;border-radius:12px;cursor:pointer;
+    font-family:"Michroma",sans-serif;font-size:12px;letter-spacing:.12em;color:#fff;
+    background:linear-gradient(90deg,var(--purple-deep),var(--purple) 70%,#b79bff);
+    box-shadow:0 6px 20px rgba(124,77,255,.35);
+    transition:transform .15s,box-shadow .15s,opacity .2s;
+  }
+  .signup button:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(124,77,255,.5)}
+  .signup button:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+  .formmsg{min-height:18px;margin-top:13px;font-size:12.5px;letter-spacing:.03em;
+    color:var(--muted);opacity:0;transition:opacity .4s}
+  .formmsg.show{opacity:1}
+  .formmsg.ok{color:#b79bff}
+  .formmsg.err{color:#ff8da6}
+  .cta .fine{margin-top:12px;font-size:11px;color:#5a6396;letter-spacing:.04em}
+
+  footer{margin-top:34px;font-size:11px;letter-spacing:.06em;color:#4d5687;
+    opacity:0;animation:fadeIn .7s ease 2.4s forwards}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important}
+    .hex{stroke-dashoffset:0}.tower{opacity:1;transform:none}
+    .wordmark h1{transform:none}.bloom,.sub,.tag,.loader,footer{opacity:1}
+    .cta{transition:none}
+  }
+</style>
+<noscript><style>.cta{opacity:1!important;transform:none!important;pointer-events:auto!important}</style></noscript>
+</head>
+<body>
+  <div class="grid"></div>
+
+  <main class="stage">
+    <div class="emblem">
+      <div class="bloom"></div>
+      <svg viewBox="0 0 440 440" aria-label="Clock Tower Labs">
+        <defs>
+          <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9a73ff"/><stop offset="1" stop-color="#5a2ff0"/>
+          </linearGradient>
+          <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c4cbef"/>
+          </linearGradient>
+        </defs>
+
+        <!-- hexagon, split -->
+        <path class="hex" pathLength="1" stroke="var(--purple)"
+              d="M220 24 L60 115 L60 305 L220 396"/>
+        <path class="hex" pathLength="1" stroke="#9aa4d8"
+              d="M220 24 L380 115 L380 305 L220 396"/>
+
+        <!-- ambient dashed ring -->
+        <circle class="ring-dash" cx="220" cy="250" r="118" fill="none"
+                stroke="rgba(180,190,240,.35)" stroke-width="1.4"
+                stroke-dasharray="2 12" stroke-linecap="round"/>
+
+        <!-- orbit groups -->
+        <g class="orbit orbit-a">
+          <circle cx="220" cy="132" r="6.5" fill="var(--purple)"/>
+        </g>
+        <g class="orbit orbit-b">
+          <circle cx="220" cy="372" r="6.5" fill="#cfd6f5"/>
+        </g>
+        <g class="orbit orbit-a">
+          <circle class="pulse-node" cx="98" cy="250" r="3.4" fill="#b79bff"/>
+        </g>
+
+        <g class="tower">
+          <!-- finial + spire -->
+          <line x1="220" y1="70" x2="220" y2="96" stroke="url(#pg)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M220 92 L186 172 L220 172 Z" fill="url(#pg)"/>
+          <path d="M220 92 L254 172 L220 172 Z" fill="url(#lg)"/>
+
+          <!-- belfry -->
+          <rect x="190" y="170" width="30" height="44" fill="url(#pg)"/>
+          <rect x="220" y="170" width="30" height="44" fill="url(#lg)"/>
+          <rect x="198" y="180" width="8" height="30" rx="4" fill="#05081c"/>
+          <rect x="234" y="180" width="8" height="30" rx="4" fill="#05081c"/>
+          <!-- cornice -->
+          <rect x="180" y="210" width="40" height="9" fill="url(#pg)"/>
+          <rect x="220" y="210" width="40" height="9" fill="url(#lg)"/>
+
+          <!-- body -->
+          <rect x="184" y="219" width="36" height="160" fill="url(#pg)"/>
+          <rect x="220" y="219" width="36" height="160" fill="url(#lg)"/>
+          <!-- base -->
+          <rect x="172" y="372" width="48" height="14" fill="url(#pg)"/>
+          <rect x="220" y="372" width="48" height="14" fill="url(#lg)"/>
+
+          <!-- clock face -->
+          <circle cx="220" cy="250" r="44" fill="var(--face)"/>
+          <circle cx="220" cy="250" r="44" fill="none" stroke="#4B22BC" stroke-width="4"/>
+          <g stroke="#1a1f44" stroke-width="2.4" stroke-linecap="round">
+            <line x1="220" y1="212" x2="220" y2="219"/>
+            <line x1="258" y1="250" x2="251" y2="250"/>
+            <line x1="220" y1="288" x2="220" y2="281"/>
+            <line x1="182" y1="250" x2="189" y2="250"/>
+          </g>
+          <!-- hands -->
+          <line class="hand-hr"  x1="220" y1="250" x2="220" y2="228" stroke="#1a1f44" stroke-width="4" stroke-linecap="round"/>
+          <line class="hand-min" x1="220" y1="250" x2="220" y2="218" stroke="#4B22BC" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="220" cy="250" r="4" fill="#4B22BC"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- wordmark -->
+    <div class="wordmark"><h1>CLOCK TOWER</h1></div>
+    <div class="sub"><i class="ln"></i><span>LABS</span><i class="ln r"></i></div>
+
+    <!-- cycling tagline -->
+    <div class="tag" id="tag">
+      <b><em>Audit</em> the past</b>
+      <b><em>Monitor</em> the present</b>
+      <b><em>Optimize</em> the future</b>
+    </div>
+
+    <!-- progress -->
+    <div class="loader">
+      <div class="meta"><span id="status">Initializing</span><span class="pct" id="pct">0%</span></div>
+      <div class="track"><div class="bar" id="bar"></div></div>
+    </div>
+
+    <!-- sign-up CTA (revealed once the loader completes) -->
+    <section class="cta" id="cta" aria-hidden="true">
+      <h2>Get Early Access</h2>
+      <p class="blurb">
+        Clock Tower Labs, Inc. is building tools to audit the past, monitor the
+        present, and optimize the future. Leave your email to learn more and be
+        first in line.
+      </p>
+      <!--
+        Sign-ups are routed server-side by Formspree to the address configured on
+        the form (kept out of this page source so it can't be scraped). Before going
+        live, create a free form at https://formspree.io, point it at your inbox, and
+        replace YOUR_FORM_ID below with the endpoint ID from your dashboard.
+        See README.md for the configured destination address and setup steps.
+      -->
+      <form class="signup" id="signupForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input type="email" name="email" placeholder="you@company.com" required autocomplete="email" aria-label="Email address">
+        <input type="hidden" name="_subject" value="New Clock Tower Labs sign-up">
+        <!-- honeypot: bots fill this, humans don't -->
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
+        <button type="submit" id="signupBtn">Notify Me</button>
+      </form>
+      <div class="formmsg" id="formMsg" role="status" aria-live="polite"></div>
+      <div class="fine">No spam — just updates on what we're building.</div>
+    </section>
+
+    <footer>© 2026 Clock Tower Labs, Inc.</footer>
+  </main>
+
+<script>
+  /* ---- status + tagline cycle ---- */
+  const tags = [...document.querySelectorAll('#tag b')];
+  let ti = 0; tags[0].classList.add('on');
+  setInterval(()=>{ tags[ti].classList.remove('on'); ti=(ti+1)%tags.length; tags[ti].classList.add('on'); }, 1900);
+
+  /* ---- progress counter ----
+     Set DURATION to your real load time, or call window.ctlDone() when ready. */
+  const bar=document.getElementById('bar'), pct=document.getElementById('pct'), status=document.getElementById('status');
+  const phases=['Initializing','Auditing history','Syncing present','Forecasting','Calibrating','Ready'];
+  const DURATION=3400, start=performance.now();
+  let done=false, revealed=false;
+  function ease(t){return 1-Math.pow(1-t,2.2);}
+  function revealCTA(){
+    if(revealed) return; revealed=true;
+    const cta=document.getElementById('cta');
+    cta.classList.add('show'); cta.setAttribute('aria-hidden','false');
+  }
+  function frame(now){
+    let t=Math.min((now-start)/DURATION,1);
+    let p=done?100:Math.floor(ease(t)*99 + (t>=1?1:0));
+    if(done) p=100;
+    bar.style.width=p+'%'; pct.textContent=p+'%';
+    status.textContent = p>=100 ? 'Systems online' : phases[Math.min(phases.length-1,Math.floor(p/18))];
+    if(p<100) requestAnimationFrame(frame);
+    else { bar.style.boxShadow='0 0 22px rgba(124,77,255,.95)'; revealCTA(); }
+  }
+  requestAnimationFrame(frame);
+  window.ctlDone=()=>{done=true; revealCTA();};
+
+  /* ---- sign-up form (Formspree AJAX submission) ---- */
+  const form=document.getElementById('signupForm');
+  const btn=document.getElementById('signupBtn');
+  const msg=document.getElementById('formMsg');
+  function showMsg(text, kind){
+    msg.textContent=text;
+    msg.className='formmsg show'+(kind?(' '+kind):'');
+  }
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const action=form.getAttribute('action');
+    if(action.indexOf('YOUR_FORM_ID')!==-1){
+      showMsg('Almost there — add your Formspree form ID to start collecting sign-ups.','err');
+      return;
+    }
+    const data=new FormData(form);
+    const label=btn.textContent;
+    btn.disabled=true; btn.textContent='Sending…';
+    try{
+      const res=await fetch(action,{method:'POST',body:data,headers:{'Accept':'application/json'}});
+      if(res.ok){
+        form.reset();
+        btn.textContent='Done ✓';
+        showMsg("You're on the list — we'll be in touch soon.",'ok');
+      } else {
+        const j=await res.json().catch(()=>({}));
+        const err=(j.errors && j.errors[0] && j.errors[0].message) || 'Something went wrong. Please try again.';
+        showMsg(err,'err'); btn.disabled=false; btn.textContent=label;
+      }
+    }catch(_){
+      showMsg('Network error — please try again.','err'); btn.disabled=false; btn.textContent=label;
+    }
+  });
+</script>
+</body>
+</html>
