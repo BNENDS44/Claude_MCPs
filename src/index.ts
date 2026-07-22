@@ -960,7 +960,10 @@ export default {
         // Browsers can't speak MCP — MCP is JSON-RPC over POST. If a user
         // hits this URL in a browser (GET) to "test" it, give a friendly
         // explanation instead of the SDK's terse "Not found".
-        if (request.method === "GET") {
+        // MCP clients also use GET (with Accept: text/event-stream) to open
+        // the SSE channel — those must pass through to the MCP handler.
+        const accept = request.headers.get("Accept") ?? "";
+        if (request.method === "GET" && !accept.includes("text/event-stream")) {
           const connectorUrl = `${url.origin}/k/${urlToken}/mcp`;
           return new Response(
             browserInfoPage({
@@ -1023,7 +1026,10 @@ export default {
     }
     if (url.pathname === "/mcp") {
       // Bare /mcp in a browser (GET) → friendly page instead of terse 404/405.
-      if (request.method === "GET") {
+      // MCP clients also use GET (with Accept: text/event-stream) to open the
+      // SSE channel — those must pass through to the MCP handler.
+      const accept = request.headers.get("Accept") ?? "";
+      if (request.method === "GET" && !accept.includes("text/event-stream")) {
         return new Response(
           browserInfoPage({
             title: "CATS ATS — MCP endpoint",
