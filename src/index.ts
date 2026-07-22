@@ -77,7 +77,37 @@ async function extractPdfText(bytes: Uint8Array): Promise<{ pages: number; text:
   return { pages: totalPages, text };
 }
 
+// The CATS web UI lives at https://<site>.catsone.com; records link as
+// /candidates/<id>, /jobs/<id>, etc. The API never states the site host
+// outright, but embedded thumbnail URLs carry it — discover it once and
+// cache it for the lifetime of this isolate.
+let cachedSiteOrigin: string | null = null;
+
+function discoverSiteOrigin(data: unknown): string | null {
+  const m = JSON.stringify(data)?.match(/https:\/\/[a-z0-9-]+\.catsone\.com/i);
+  if (m) cachedSiteOrigin = m[0];
+  return cachedSiteOrigin;
+}
+
+function addProfileUrls(node: unknown, origin: string): void {
+  if (Array.isArray(node)) {
+    for (const item of node) addProfileUrls(item, origin);
+    return;
+  }
+  if (node && typeof node === "object") {
+    const obj = node as Record<string, unknown>;
+    const href = (obj._links as { self?: { href?: unknown } } | undefined)?.self?.href;
+    if (typeof href === "string") {
+      const m = href.match(/^\/(candidates|jobs|companies|contacts)\/(\d+)$/);
+      if (m) obj.profile_url = `${origin}/${m[1]}/${m[2]}`;
+    }
+    for (const value of Object.values(obj)) addProfileUrls(value, origin);
+  }
+}
+
 function ok(data: unknown) {
+  const origin = discoverSiteOrigin(data);
+  if (origin) addProfileUrls(data, origin);
   return {
     content: [
       { type: "text" as const, text: JSON.stringify(data, null, 2) },
@@ -794,9 +824,24 @@ export class CatsMcp extends McpAgent<Env> {
 
     s.tool(
       "get_me",
-      "Get the API user's own profile (who owns CATS_API_KEY).",
+      "Identify the API user (who owns CATS_API_KEY). Falls back to the site's " +
+        "user list when the CATS instance has no current-user endpoint.",
       {},
-      async () => ok(await call("GET", "/users/me")),
+      async () => {
+        try {
+          return ok(await call("GET", "/users/me"));
+        } catch (e) {
+          if (!(e instanceof Error) || !e.message.includes("404")) throw e;
+          const users = await call("GET", "/users", { per_page: 100 });
+          return ok({
+            note:
+              "This CATS instance has no current-user endpoint; returning the " +
+              "site's user list instead. The API key's owner is one of these " +
+              "users (typically the owner_id seen on records they created).",
+            users,
+          });
+        }
+      },
     );
 
     s.tool(
