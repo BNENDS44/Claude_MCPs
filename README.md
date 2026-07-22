@@ -8,10 +8,15 @@ that lets Claude (Desktop, Code, or the web app) drive your
   for a recruiting team, no servers to babysit.
 - **Shared-key model** — one CATS API key stored as a Worker secret; every
   teammate connects with a shared bearer token you hand out.
-- **Full CATS coverage** — ~40 purpose-built tools for candidates, jobs,
+- **Full CATS coverage** — 65 purpose-built tools for candidates, jobs,
   companies, contacts, lists, pipelines, tags, notes, activities, users,
-  custom fields, email templates, plus a generic `cats_request` escape hatch
-  for anything exotic.
+  custom fields, email templates — including full-text search and resume-PDF
+  text extraction — plus a generic `cats_request` escape hatch for anything
+  exotic.
+
+> **New to this?** Hand your recruiters the one-page guide:
+> [**Using CATS in Claude**](docs/USING-CATS-IN-CLAUDE.md) — plain-English
+> examples of what to ask and five tips that make it 10× better.
 
 > **Also in this repo — [`skill-router`](#8-bonus-the-skill-router-plugin):** a
 > Claude Code plugin that automatically launches the best skill for every task
@@ -108,9 +113,11 @@ Go to **Settings → Connectors → Add custom connector** and enter the same
 ### Claude Code (CLI) — easiest: install the plugin
 
 This repo also ships a Claude Code **plugin** that bundles the MCP connection,
-slash commands (`/cats-search`, `/cats-find-candidate`, `/cats-pipeline`,
-`/cats-daily-summary`, `/cats-add-note`, `/cats-new-candidate`), a recruiter
-subagent, and `candidate-intake` + `candidate-search` skills. Each teammate runs this once:
+six slash commands (`/cats-ats:search`, `/cats-ats:find-candidate`,
+`/cats-ats:pipeline`, `/cats-ats:daily-summary`, `/cats-ats:add-note`,
+`/cats-ats:new-candidate` — plugin commands are namespaced by plugin name), a
+recruiter subagent, and `candidate-intake` + `candidate-search` skills. Each
+teammate runs this once:
 
 ```bash
 # 1. Tell Claude where your Worker lives and give it the shared token.
@@ -194,6 +201,12 @@ automatically):
 ---
 
 ## 7. Troubleshooting
+
+**Quick self-test (no tools needed)** — open
+`https://cats-ats-mcp.<your-subdomain>.workers.dev/k/<TOKEN>/` (note the
+trailing slash, no `/mcp`) in any browser. A green "✓ Token is valid" page
+means the server and token are both fine; `Unauthorized` means the token is
+wrong.
 
 **`Unauthorized` when teammates connect** — they're missing or mistyping the
 bearer token. Have them paste it again, exactly.
