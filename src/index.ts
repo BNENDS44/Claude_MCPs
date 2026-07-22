@@ -115,6 +115,47 @@ function ok(data: unknown) {
   };
 }
 
+function capString(s: unknown, max: number): unknown {
+  return typeof s === "string" && s.length > max ? s.slice(0, max) + " …[truncated]" : s;
+}
+
+// Raw CATS candidate records are enormous — full activity notes, duplicated
+// phone/email sub-resources, custom fields, thumbnails, and HAL _links on
+// every nested object. A 25-hit search can exceed 100 KB, which stalls chat
+// clients long enough to drop the conversation. Keep only what shortlisting
+// and ranking actually use; get_candidate still returns everything.
+function slimCandidateRecord(c: Record<string, unknown>): void {
+  const links = c._links as { self?: unknown } | undefined;
+  if (links?.self) c._links = { self: links.self }; // keep for profile_url
+  else delete c._links;
+
+  const emb = c._embedded as Record<string, unknown> | undefined;
+  if (!emb) return;
+  delete emb.thumbnail;
+  delete emb.phones; // duplicated in the top-level phones field
+  delete emb.emails; // duplicated in the top-level emails field
+  delete emb.custom_fields;
+  if (Array.isArray(emb.activities)) {
+    emb.activities = emb.activities.slice(0, 3).map((a: Record<string, unknown>) => ({
+      date: a.date,
+      type: a.type,
+      annotation: a.annotation,
+      notes: capString(a.notes, 500),
+    }));
+  }
+  if (Array.isArray(emb.work_history)) {
+    for (const w of emb.work_history as Record<string, unknown>[]) {
+      delete w._links;
+      w.summary = capString(w.summary, 600);
+    }
+  }
+  if (Array.isArray(emb.attachments)) {
+    for (const att of emb.attachments as Record<string, unknown>[]) {
+      delete att._links;
+    }
+  }
+}
+
 const paging = {
   page: z.number().int().positive().optional().describe("Page number (1-indexed)"),
   per_page: z
@@ -148,13 +189,27 @@ export class CatsMcp extends McpAgent<Env> {
         "resume PDF. The query supports quoted phrases and boolean operators " +
         "(AND, OR, NOT, parentheses) — e.g. `\"Harvard\" AND \"Computer Science\" " +
         "AND (\"Citadel\" OR \"Two Sigma\")`. Bare multi-word queries default to OR " +
-        "and will balloon the match count; quote phrases for precision.",
+        "and will balloon the match count; quote phrases for precision. Results " +
+        "are slimmed for speed (contact info, work history, recent activity, " +
+        "attachments, profile_url); use get_candidate for a full record.",
       {
         ...paging,
         query: z.string().describe("Full-text query with optional AND/OR/NOT and quoted phrases"),
+        full: z
+          .boolean()
+          .optional()
+          .describe("Return raw unslimmed CATS records (very large; only when explicitly needed)"),
       },
-      async ({ query, ...q }) =>
-        ok(await call("GET", "/candidates/search", { ...q, query })),
+      async ({ query, full, ...q }) => {
+        const data = (await call("GET", "/candidates/search", { ...q, query })) as {
+          _embedded?: { candidates?: Record<string, unknown>[] };
+        } | null;
+        if (!full && data?._embedded?.candidates) {
+          discoverSiteOrigin(data); // cache the site host before thumbnails are stripped
+          for (const c of data._embedded.candidates) slimCandidateRecord(c);
+        }
+        return ok(data);
+      },
     );
 
     s.tool(
