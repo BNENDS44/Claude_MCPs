@@ -18,7 +18,7 @@ Don't ask for clarification unless the query is truly ambiguous.
 
 When you have results, show a short table with:
 
-- Candidate name
+- Candidate name — **as a clickable link** to their CATS profile (use the `profile_url` field on each record)
 - Current title / most recent role
 - Location
 - Email (if available)
