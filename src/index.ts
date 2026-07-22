@@ -99,7 +99,7 @@ const paging = {
 export class CatsMcp extends McpAgent<Env> {
   server = new McpServer({
     name: "cats-ats",
-    version: "0.1.0",
+    version: "0.2.0",
   });
 
   async init() {
