@@ -1,7 +1,7 @@
 {
   "name": "cats-ats",
-  "version": "0.1.0",
-  "description": "Drive your CATS ATS from Claude Code — search candidates, update jobs, add notes, and run daily recruiting workflows.",
+  "version": "0.2.0",
+  "description": "Drive your CATS ATS from Claude Code — full-text candidate/job/company/contact search (including resume PDFs), record management, notes, and daily recruiting workflows via 6 slash commands, a recruiter subagent, and candidate-intake + candidate-search skills.",
   "author": {
     "name": "BNENDS44",
     "url": "https://github.com/BNENDS44"

@@ -8,8 +8,8 @@
     {
       "name": "cats-ats",
       "source": "./plugins/cats-ats",
-      "description": "CATS ATS for Claude Code — connects Claude to your CATS recruiting database via the cloud MCP server, with slash commands, a recruiter subagent, and a candidate-intake skill.",
-      "version": "0.1.0",
+      "description": "CATS ATS for Claude Code — connects Claude to your CATS recruiting database via the cloud MCP server, with 6 slash commands (including full-text /cats-search with 1-10 candidate scoring), a recruiter subagent, and candidate-intake + candidate-search skills.",
+      "version": "0.2.0",
       "category": "recruiting",
       "tags": ["cats", "ats", "recruiting", "mcp"]
     },
